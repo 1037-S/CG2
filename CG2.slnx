@@ -5,5 +5,5 @@
   <Folder Name="/ソリューション項目/">
     <File Path=".editorconfig" />
   </Folder>
-  <Project Path="CG2.vcxproj" />
+  <Project Path="CG2.vcxproj" Id="894bcd2f-e46f-45a1-87a5-7901c9810052" />
 </Solution>
