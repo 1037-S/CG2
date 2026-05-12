@@ -1,4 +1,9 @@
-#include  <Windows.h>
+#pragma comment(lib,"d3d12.lib")
+#pragma comment(lib,"dxgi.lib")
+#include <d3d12.h>
+#include <dxgi1_6.h>
+#include <cassert>
+#include <Windows.h>
 #include <cstdint>
 #include <string>
 #include <format>
@@ -57,10 +62,21 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg,
 
 }
 
+void Log(const std::string& message) {
+	OutputDebugStringA(message.c_str());
+}
+
+void Log(const std::wstring& message) {
+	Log(ConvertString(message));
+}
+
 void Log(std::ostream& os, const std::string& message) {
 	os << message << std::endl;
 	OutputDebugStringA(message.c_str());
 }
+
+
+
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
@@ -75,13 +91,14 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	std::chrono::time_point<std::chrono::system_clock, std::chrono::seconds>
 		nowSeconds = std::chrono::time_point_cast<std::chrono::seconds>(now);
 	// 日本時間(PCの設定時間)に変換
-	std::chrono::zoned_time localTime{ std::chrono::current_zone(),nowSeconds};
+	std::chrono::zoned_time localTime{ std::chrono::current_zone(),nowSeconds };
 	// formatを使って年月日_時分秒の文字列に変換
 	std::string dateString = std::format("{:%y%m%d_%H%M%S}", localTime);
 	// 時刻を使ってファイル名を決定
 	std::string logFilePath = std::string("logs/") + dateString + ".log";
 	// ファイルを作って書き込み準備
 	std::ofstream logStream(logFilePath);
+
 
 
 	// ウィンドウプロシージャ
@@ -102,13 +119,17 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	const int32_t kClientWidth = 1280;
 	const int32_t kClientHeight = 720;
 
+
+
 	// ウィンドウサイズを表す構造体にクライアント領域を入れる
 	RECT wrc = { 0,0,kClientWidth,kClientHeight };
 
 	// クライアント領域を元に実際のサイズにwrcを変更してもらう
 	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
 
+
 	//ウィンドウの生成
+
 	HWND hwnd = CreateWindow(
 		wc.lpszClassName,					// 利用するクラス名
 		L"CG2",							// タイトルバーの文字	
@@ -122,8 +143,62 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		wc.hInstance,					// インスタンスハンドル
 		nullptr);						// オプション
 
+
 	//ウィンドウを表示する
 	ShowWindow(hwnd, SW_SHOW);
+
+	// DXGIファクトリーの生成
+	IDXGIFactory7* dxgiFactory = nullptr;
+	// HRESULTはWindows系のエラーコードであり、
+	// 関数が成功したかどうかをSUCCEEDEDマクロで判定できる
+	HRESULT hr = CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory));
+	// 初期化の根本的な部分でエラーが出た場合は、
+	// プログラムが間違っているか、どうにもできないことが多いのでassertにしておく
+	assert(SUCCEEDED(hr));
+
+	// 使用するアダプタ用の変数。最初にnullptrを入れておく
+	IDXGIAdapter4* useAdapter = nullptr;
+	// 良い順にアダプタを頼む
+	for (UINT i = 0; dxgiFactory->EnumAdapterByGpuPreference(i,
+		DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&useAdapter)) !=
+		DXGI_ERROR_NOT_FOUND; ++i)
+	{
+		// アダプターの情報を取得する
+		DXGI_ADAPTER_DESC3 adapterDesc{};
+		hr = useAdapter->GetDesc3(&adapterDesc);
+		assert(SUCCEEDED(hr)); // 所得出来ないのは一大事
+		// ソフトウェアアダプタでなければ採用!
+		if (!(adapterDesc.Flags & DXGI_ADAPTER_FLAG3_SOFTWARE))
+		{
+			// 採用したアダプタの情報をログに出力。wstringのほうなので注意
+            Log(logStream, ConvertString(std::format(L"Use Adapater:{}\n", adapterDesc.Description)));
+			break;
+		}
+		// ソフトウェアアダプタの場合は見なかったことにする
+		useAdapter = nullptr;
+	}
+	// 適切なアダプタが見つからなかったので起動できない
+	assert(useAdapter != nullptr);
+
+	ID3D12Device* device = nullptr;
+	// 機能レベルとログ出力用の文字列
+	D3D_FEATURE_LEVEL featureLevels[] = {
+		D3D_FEATURE_LEVEL_12_2,D3D_FEATURE_LEVEL_12_1,D3D_FEATURE_LEVEL_12_0
+	};
+	const char* featureLevelStrings[] = {"12.2","12.1","12.0"};
+	// 高い順に生成できるか試していく
+	for (size_t i = 0; i < _countof(featureLevels); ++i)
+	{
+		// 採用したアダプターでデバイスを生成
+		hr = D3D12CreateDevice(useAdapter,featureLevels[i],IID_PPV_ARGS(&device));
+		// 指定した機能レベルでデバイスを生成できたか確認
+		if (SUBLANGID(hr)){
+
+			// 生成できたのでログ出力を行ってループを抜ける
+			Log(ConvertString(std::format("FatureLevel:{}\n",featureLevelStrings[i])));
+			break;
+		}
+	}
 
 	MSG msg{};
 
