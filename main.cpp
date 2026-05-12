@@ -62,7 +62,13 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg,
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 
 }
+void Log(const std::string& message) {
+	OutputDebugStringA(message.c_str());
+}
 
+void Log(const std::wstring& message) {
+	Log(ConvertString(message));
+}
 void Log(const std::string& message) {
 	OutputDebugStringA(message.c_str());
 }
