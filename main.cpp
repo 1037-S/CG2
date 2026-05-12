@@ -171,7 +171,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		if (!(adapterDesc.Flags & DXGI_ADAPTER_FLAG3_SOFTWARE))
 		{
 			// 採用したアダプタの情報をログに出力。wstringのほうなので注意
-            Log(logStream, ConvertString(std::format(L"Use Adapater:{}\n", adapterDesc.Description)));
+            Log(ConvertString(std::format(L"Use Adapater:{}\n", adapterDesc.Description)));
 			break;
 		}
 		// ソフトウェアアダプタの場合は見なかったことにする
