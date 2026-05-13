@@ -164,9 +164,30 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		wc.hInstance,					// インスタンスハンドル
 		nullptr);						// オプション
 
+#ifdef _DEBUG
+	ID3D12Debug1* debugController = nullptr;
+	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
+	{
+		// デバッグレイヤー
+		debugController->EnableDebugLayer();
+		// さらにGPU側でもチェックを行うようにする
+		debugController->SetEnableGPUBasedValidation(TRUE);
+	}
+#endif // _DEBUG
 
 	//ウィンドウを表示する
 	ShowWindow(hwnd, SW_SHOW);
+
+	// 変数から型を推論してくれる
+	int enemyhp = 100;
+	int texturePath = 0;
+	Log(std::format("enemyHp:{},texturePath:{}\n",enemyhp,texturePath));
+
+	// string->wstring
+	std::wstring ConvertString(const std::string& str);
+	// wstring->string
+	std::string ConvertString(const std::wstring& str);
+
 
 	// DXGIファクトリーの生成
 	IDXGIFactory7* dxgiFactory = nullptr;
