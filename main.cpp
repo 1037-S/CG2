@@ -179,9 +179,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	ShowWindow(hwnd, SW_SHOW);
 
 	// 変数から型を推論してくれる
-	//int enemyhp = 100;
-	//int texturePath = 0;
-	//Log(std::format("enemyHp:{},texturePath:{}\n",enemyhp,texturePath));
+	int enemyHp = 100;
+	int texturePath = 0;
+	Log(std::format("enemyHp:{},texturePath:{}\n",enemyHp,texturePath));
 
 	// string->wstring
 	//std::wstring ConvertString(const std::string& str);
@@ -213,7 +213,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		if (!(adapterDesc.Flags & DXGI_ADAPTER_FLAG3_SOFTWARE))
 		{
 			// 採用したアダプタの情報をログに出力。wstringのほうなので注意
-            Log(ConvertString(std::format(L"Use Adapater:{}\n", adapterDesc.Description)));
+            Log(logStream, ConvertString(std::format(L"Use Adapater:{}\n", adapterDesc.Description)));
 			break;
 		}
 		// ソフトウェアアダプタの場合は見なかったことにする
@@ -234,10 +234,10 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		// 採用したアダプターでデバイスを生成
 		hr = D3D12CreateDevice(useAdapter,featureLevels[i],IID_PPV_ARGS(&device));
 		// 指定した機能レベルでデバイスを生成できたか確認
-		if (SUBLANGID(hr)){
+		if (SUCCEEDED(hr)){
 
 			// 生成できたのでログ出力を行ってループを抜ける
-			Log(ConvertString(std::format("FatureLevel:{}\n",featureLevelStrings[i])));
+			Log(logStream,std::format("FatureLevel:{}\n",featureLevelStrings[i]));
 			break;
 		}
 	}
