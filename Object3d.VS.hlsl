@@ -16,6 +16,6 @@ struct VertexShaderInput
 VertexShaderOutput main(VertexShaderInput input)
 {
     VertexShaderOutput outPut;
-    outPut.positon = mul(input.positon,gTransformationMatrix.WVP);
+    outPut.position = mul(input.position,gTransformationMatrix.WVP);
     return outPut;
 }
