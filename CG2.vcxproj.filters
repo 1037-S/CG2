@@ -13,14 +13,64 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="数学関数">
+      <UniqueIdentifier>{4c11152c-f841-4285-9845-42a86e3883a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="数学関数\ヘッダーファイル">
+      <UniqueIdentifier>{527fd625-a26f-41a8-b001-fbc97e5800ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="数学関数\ソースファイル">
+      <UniqueIdentifier>{eb1ac8b5-2fa4-46d2-aa47-af91aaea69ae}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="M4.cpp">
+      <Filter>数学関数\ソースファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="V3M.cpp">
+      <Filter>数学関数\ソースファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="MM.cpp">
+      <Filter>数学関数\ソースファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="RTT.cpp">
+      <Filter>数学関数\ソースファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="WM4.cpp">
+      <Filter>数学関数\ソースファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="WVP.cpp">
+      <Filter>数学関数\ソースファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Object3d.VS.hlsl" />
     <FxCompile Include="Object3d.PS.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="M4.h">
+      <Filter>数学関数\ヘッダーファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="OBJECT.h">
+      <Filter>数学関数\ヘッダーファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="V3M.h">
+      <Filter>数学関数\ヘッダーファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="MM.h">
+      <Filter>数学関数\ヘッダーファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="RTT.h">
+      <Filter>数学関数\ヘッダーファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="WM4.h">
+      <Filter>数学関数\ヘッダーファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="WVP.h">
+      <Filter>数学関数\ヘッダーファイル</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,3 +1,8 @@
+struct TransformationMatrix{
+    float32_t4x4 WVP;
+};
+ConstantBuffer<TransformationMatrix> gTransformationMatrix : register(b0);
+
 struct VertexShaderOutput
 {
     float32_t4 positon : SV_POSITION;
@@ -5,12 +10,12 @@ struct VertexShaderOutput
 
 struct VertexShaderInput
 {
-    float32_t4 positon : POSITION;
+    float32_t4 positon : POSITION0;
 };
 
 VertexShaderOutput main(VertexShaderInput input)
 {
     VertexShaderOutput outPut;
-    outPut.positon = input.positon;
+    outPut.positon = mul(input.positon,gTransformationMatrix.WVP);
     return outPut;
 }

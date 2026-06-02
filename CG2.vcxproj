@@ -91,7 +91,13 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(Target)dxil.
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="M4.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MM.cpp" />
+    <ClCompile Include="RTT.cpp" />
+    <ClCompile Include="V3M.cpp" />
+    <ClCompile Include="WM4.cpp" />
+    <ClCompile Include="WVP.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Object3d.PS.hlsl">
@@ -104,6 +110,15 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(Target)dxil.
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="M4.h" />
+    <ClInclude Include="MM.h" />
+    <ClInclude Include="OBJECT.h" />
+    <ClInclude Include="RTT.h" />
+    <ClInclude Include="V3M.h" />
+    <ClInclude Include="WM4.h" />
+    <ClInclude Include="WVP.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
