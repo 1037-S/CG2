@@ -615,7 +615,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	scissorRect.bottom = kClientHeight;
 
 	// マテリアル用のリソースを作る。今回はcolor1つ分のサイズを用意する
-	ID3D12Resource* materialResource = CreateBufferResouce(device, sizeof(Vector4));
+	ID3D12Resource* materialResource = CreateBufferResouce(device, sizeof(Vector4{}));
 	// マテリアルにデータを書き込む
 	Vector4* materialData = nullptr;
 	// 書き込むためのアドレスを取得
