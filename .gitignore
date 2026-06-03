@@ -365,3 +365,5 @@ logs/
 
 *.dmp
 Dumps/
+
+imgui.ini

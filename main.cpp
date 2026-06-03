@@ -17,6 +17,14 @@
 #include "WVP.h"
 #include "WM4.h"
 #include "M4.h"
+#ifdef USE_IMGUI
+// Imgui
+#include "externals/imgui/imgui.h"
+#include "externals/imgui/imgui_impl_dx12.h"
+#include "externals/imgui/imgui_impl_win32.h"
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(
+	HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+#endif // USE_IMGUI
 // ファイルやシステムに関する操作を行うライブラリ
 #include <filesystem>
 // ファイルに書いたり読んだりするライブラリ
@@ -56,6 +64,14 @@ std::string ConvertString(const std::wstring& str) {
 //ウィンドウプロシージャ
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg,
 	WPARAM wparam, LPARAM lparam) {
+#ifdef USE_IMGUI
+
+	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam,lparam))
+	{
+		return true;
+	}
+
+#endif // USE_IMGUI
 	//メッセージに応じてゲーム固有の処理を行う
 	switch (msg)
 	{
@@ -142,6 +158,7 @@ IDxcBlob* CompileShader(
 		filePath.c_str(), // コンパイル対象のhlslファイル名
 		L"-E",L"main", // エントリーポイントの指定。基本的にmain以外にはしない
 		L"-T",profile, // ShaderProfileの設定
+		L"-HV",L"2021", // HLSL 2021言語仕様を有効にする
 		L"-Zi",L"-Qembed_debug", //デバッグ用の情報を埋め込む
 		L"-Od", // 最適化を外しておく
 		L"-Zpr", // メモリレイアウトは行優先
@@ -215,9 +232,27 @@ ID3D12Resource* CreateBufferResouce(ID3D12Device* device, size_t sizeInBytes) {
 	return vertexResource;
 };
 
+ID3D12DescriptorHeap* CreateDescriptorHeap(
+ID3D12Device* device, 
+D3D12_DESCRIPTOR_HEAP_TYPE heaptype,
+UINT numDescriptors, bool shaderVisible
+) {
+	ID3D12DescriptorHeap* descriptorHeap = nullptr;
+	D3D12_DESCRIPTOR_HEAP_DESC descriptorHeapDesc{};
+	descriptorHeapDesc.Type = heaptype;
+	descriptorHeapDesc.NumDescriptors = numDescriptors;
+	descriptorHeapDesc.Flags = shaderVisible ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	HRESULT hr = device->CreateDescriptorHeap(&descriptorHeapDesc,IID_PPV_ARGS(&descriptorHeap));
+	assert(SUCCEEDED(hr));
+	return descriptorHeap;
+}
+
+
+
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	WNDCLASS wc{};
+
 
 	// 誰も催促しなかった場合に(Unhandled)、補足する関数を用意
 	// main関数始まってすぐに登録すると良い
@@ -430,13 +465,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	assert(SUCCEEDED(hr));
 
 	// ディスクリプタヒープの生成
-	ID3D12DescriptorHeap* rtvDescriptorHeap = nullptr;
-	D3D12_DESCRIPTOR_HEAP_DESC rtvDescriptorHeapDesc{};
-	rtvDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV; //レンダーターゲットビュー用
-	rtvDescriptorHeapDesc.NumDescriptors = 2; // ダブルバッファ用に2つ。多くても別に構わない
-	hr = device->CreateDescriptorHeap(&rtvDescriptorHeapDesc, IID_PPV_ARGS(&rtvDescriptorHeap));
-	// ディスクリプタヒープが作れなかったので起動できない
-	assert(SUCCEEDED(hr));
+	// RTV用のディスクリプタの数は2。RTVはShader内で触るものではないので、ShaderVisibleはfalseである
+	ID3D12DescriptorHeap* rtvDescriptorHeap = CreateDescriptorHeap(device,D3D12_DESCRIPTOR_HEAP_TYPE_RTV,2,false);
+
+	// SRV用のディスクリプタの数は128。SRVはShader内で触るものなので、ShaderVisibleはtrueである
+	ID3D12DescriptorHeap* srvDescriptorHeap = CreateDescriptorHeap(device,D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,128,true);
 
 	// SwapChainからResourceを引っ張ってくる
 	ID3D12Resource* swapChainResources[2] = { nullptr };
@@ -656,6 +689,24 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	};
 
 	MSG msg{};
+#ifdef USE_IMGUI
+
+	// ImGuiの初期化
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui::StyleColorsDark();
+	ImGui_ImplWin32_Init(hwnd);
+	ImGui_ImplDX12_Init(device,
+		swapChainDesc.BufferCount,
+		rtvDesc.Format,
+		srvDescriptorHeap,
+		srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
+		srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart()
+	);
+	ImGuiIO& io = ImGui::GetIO();
+	io.Fonts->Build();
+
+#endif // USE_IMGUI
 
 	// ウィンドウの×ボタンが押されるまでのループ
 	while (msg.message != WM_QUIT) {
@@ -666,8 +717,19 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			DispatchMessage(&msg);
 		}
 		else {
-
+			
 			//ゲームの処理
+
+#ifdef USE_IMGUI
+			// ImGui
+			ImGui_ImplDX12_NewFrame();
+			ImGui_ImplWin32_NewFrame();
+			ImGui::NewFrame();
+
+			// 開発用UIの処理。実際に開発用UIを出す場合はここをゲーム固有の処理に置き換える
+			ImGui::ShowDemoWindow();
+#endif // USE_IMGUI
+			// 関数
 			transform.rotate.y += 0.03f;
 			Matrix4x4 worldMatrix = wm4.MakeAffineMatrix(transform.scale,transform.rotate,transform.translate);
 			Matrix4x4 cameraMatrix = wm4.MakeAffineMatrix(cameraTransform.scale,cameraTransform.rotate,cameraTransform.translate);
@@ -679,6 +741,15 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 			// これから書き込むバックバッファのインデックスを取得
 			UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
+			
+#ifdef USE_IMGUI
+
+			// ImGui
+			// ImGuiの内部コマンドを生成
+			ImGui::Render();
+
+#endif // USE_IMGUI
+
 			//TransitionBarrerの設定
 			D3D12_RESOURCE_BARRIER barrier{};
 			// 今回のバリアはTransition
@@ -700,6 +771,10 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			float clearColor[] = { 0.1f,0.25f,0.5f,1.0f }; // 青っぽい色。RGBAの順
 			commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
 
+			// 描画用のDescriptorHeapの設定
+			ID3D12DescriptorHeap* descriptorHeaps[] = { srvDescriptorHeap };
+			commandList->SetDescriptorHeaps(1, descriptorHeaps);
+
 			// コマンドを積む
 			commandList->RSSetViewports(1, &viewport); // Viewportを設定
 			commandList->RSSetScissorRects(1, &scissorRect); // ScissorRectを設定
@@ -717,6 +792,13 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 			// 描画!(DrawCall/ドローコール)。3頂点で1つのインスタンス。インスタンスについてはまた今度
 			commandList->DrawInstanced(3, 1, 0, 0);
+			
+#ifdef USE_IMGUI
+
+			// 実際のcommandListのImGuiの描画コマンドを積む
+			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(),commandList);
+
+#endif // USE_IMGUI
 
 			// 画面に書く処理はすべて終わり、画面に映すので、状態を還移
 			// 今回はRenderTargetからPresentにする
@@ -768,6 +850,16 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		debug->ReportLiveObjects(DXGI_DEBUG_D3D12, DXGI_DEBUG_RLO_ALL);
 		debug->Release();
 	}
+
+	// 解放処理
+#ifdef USE_IMGUI
+
+	// ImGuiの終了処理
+	ImGui_ImplDX12_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
+
+#endif // USE_IMGUI
 
 	CloseHandle(fenceEvent);
 	fence->Release();
