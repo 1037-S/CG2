@@ -729,7 +729,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			// UIの処理
 			ImGui::Begin("Window");
 
-			ImGui::ColorEdit4("",reinterpret_cast<float*>(materialData));
+			ImGui::ColorEdit4("color",reinterpret_cast<float*>(materialData));
 
 			ImGui::End();
 
