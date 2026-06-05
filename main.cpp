@@ -66,7 +66,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg,
 	WPARAM wparam, LPARAM lparam) {
 #ifdef USE_IMGUI
 
-	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam,lparam))
+	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam))
 	{
 		return true;
 	}
@@ -233,16 +233,16 @@ ID3D12Resource* CreateBufferResouce(ID3D12Device* device, size_t sizeInBytes) {
 };
 
 ID3D12DescriptorHeap* CreateDescriptorHeap(
-ID3D12Device* device, 
-D3D12_DESCRIPTOR_HEAP_TYPE heaptype,
-UINT numDescriptors, bool shaderVisible
+	ID3D12Device* device,
+	D3D12_DESCRIPTOR_HEAP_TYPE heaptype,
+	UINT numDescriptors, bool shaderVisible
 ) {
 	ID3D12DescriptorHeap* descriptorHeap = nullptr;
 	D3D12_DESCRIPTOR_HEAP_DESC descriptorHeapDesc{};
 	descriptorHeapDesc.Type = heaptype;
 	descriptorHeapDesc.NumDescriptors = numDescriptors;
 	descriptorHeapDesc.Flags = shaderVisible ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-	HRESULT hr = device->CreateDescriptorHeap(&descriptorHeapDesc,IID_PPV_ARGS(&descriptorHeap));
+	HRESULT hr = device->CreateDescriptorHeap(&descriptorHeapDesc, IID_PPV_ARGS(&descriptorHeap));
 	assert(SUCCEEDED(hr));
 	return descriptorHeap;
 }
@@ -466,10 +466,10 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// ディスクリプタヒープの生成
 	// RTV用のディスクリプタの数は2。RTVはShader内で触るものではないので、ShaderVisibleはfalseである
-	ID3D12DescriptorHeap* rtvDescriptorHeap = CreateDescriptorHeap(device,D3D12_DESCRIPTOR_HEAP_TYPE_RTV,2,false);
+	ID3D12DescriptorHeap* rtvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
 
 	// SRV用のディスクリプタの数は128。SRVはShader内で触るものなので、ShaderVisibleはtrueである
-	ID3D12DescriptorHeap* srvDescriptorHeap = CreateDescriptorHeap(device,D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,128,true);
+	ID3D12DescriptorHeap* srvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 128, true);
 
 	// SwapChainからResourceを引っ張ってくる
 	ID3D12Resource* swapChainResources[2] = { nullptr };
@@ -608,7 +608,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	assert(SUCCEEDED(hr));
 
 	// 頂点関数
-	ID3D12Resource* vertexResource = CreateBufferResouce(device,sizeof(Vector4)*3);
+	ID3D12Resource* vertexResource = CreateBufferResouce(device, sizeof(Vector4) * 3);
 
 	// 頂点バッファビューを作る
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
@@ -652,15 +652,15 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// マテリアルにデータを書き込む
 	Vector4* materialData = nullptr;
 	// 書き込むためのアドレスを取得
-	materialResource->Map(0,nullptr,reinterpret_cast<void**>(&materialData));
+	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
 	// 今回は赤を書き込んでみる
-	*materialData = Vector4(1.0f,0.0f,0.0f,1.0f);
+	*materialData = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
 
-	
+
 
 	// WVP用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
 	WVP wvp{};
-	ID3D12Resource* wvpResource = CreateBufferResouce(device,sizeof(Matrix4x4));
+	ID3D12Resource* wvpResource = CreateBufferResouce(device, sizeof(Matrix4x4));
 	// データを書き込む
 	Matrix4x4* wvpData = nullptr;
 	// 書き込むためのアドレスを取得
@@ -717,7 +717,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			DispatchMessage(&msg);
 		}
 		else {
-			
+
 			//ゲームの処理
 
 #ifdef USE_IMGUI
@@ -729,33 +729,49 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			// UIの処理
 			ImGui::Begin("Window");
 
-			ImGui::ColorEdit4("",reinterpret_cast<float*>(materialData));
+			ImGui::ColorEdit4("color", reinterpret_cast<float*>(materialData));
 
 			ImGui::End();
 
 			// 開発用UIの処理。実際に開発用UIを出す場合はここをゲーム固有の処理に置き換える
 			//ImGui::ShowDemoWindow();
-			
+
 #endif // USE_IMGUI
 			// 関数
 			//transform.rotate.y += 0.03f;
-			
-			Matrix4x4 worldMatrix = wm4.MakeAffineMatrix(transform.scale,transform.rotate,transform.translate);
-			Matrix4x4 cameraMatrix = wm4.MakeAffineMatrix(cameraTransform.scale,cameraTransform.rotate,cameraTransform.translate);
+
+			Matrix4x4 worldMatrix = wm4.MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
+			Matrix4x4 cameraMatrix = wm4.MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
 			Matrix4x4 viewMatrix = m4.Inverse(cameraMatrix);
 			Matrix4x4 projectionMatrix = wvp.MakePerspectiveFovMatrix(0.45f, float(KWindowWidth) / float(KWindowHeight), 0.1f, 100.0f);
 			// wvpMatrixを作る
-			Matrix4x4 worldViewProjectionMatrix = m4.Multiply(worldMatrix,m4.Multiply(viewMatrix,projectionMatrix));
+			Matrix4x4 worldViewProjectionMatrix = m4.Multiply(worldMatrix, m4.Multiply(viewMatrix, projectionMatrix));
 			*wvpData = worldViewProjectionMatrix;
 
 			// これから書き込むバックバッファのインデックスを取得
 			UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
-			
+
 #ifdef USE_IMGUI
 
 			ImGui::Begin("Settings");
 
-			ImGui::CollapsingHeader("Object");
+			if (ImGui::CollapsingHeader("Object"))
+			{
+				ImGui::SliderFloat3("Translate", reinterpret_cast<float*>(&transform.translate), -10.0f, 10.0f, "%.1f");
+				ImGui::SliderFloat3("Rotate", reinterpret_cast<float*>(&transform.rotate), -10.0f, 10.0f, "%.1f");
+				ImGui::SliderFloat3("Scale", reinterpret_cast<float*>(&transform.scale), -10.0f, 10.0f, "%.1f");
+				if (ImGui::Button("Delete"))
+				{
+					transform.translate = { 0.0f,0.0f,0.0f };
+					transform.rotate = { 0.0f,0.0f,0.0f };
+					transform.scale = { 1.0f,1.0f,1.0f };
+				}
+				if (ImGui::CollapsingHeader("Material"))
+				{
+
+				}
+			}
+
 
 			ImGui::End();
 
@@ -800,18 +816,18 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			// 形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
 			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			// マテリアルCBufferの場所を設定
-			commandList->SetGraphicsRootConstantBufferView(0,materialResource->GetGPUVirtualAddress());
-			
+			commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+
 			// wvp用のCbufferの場所を設定
-			commandList->SetGraphicsRootConstantBufferView(1,wvpResource->GetGPUVirtualAddress());
+			commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
 
 			// 描画!(DrawCall/ドローコール)。3頂点で1つのインスタンス。インスタンスについてはまた今度
 			commandList->DrawInstanced(3, 1, 0, 0);
-			
+
 #ifdef USE_IMGUI
 
 			// 実際のcommandListのImGuiの描画コマンドを積む
-			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(),commandList);
+			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
 
 #endif // USE_IMGUI
 
