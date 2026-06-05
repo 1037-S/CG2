@@ -753,6 +753,12 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			
 #ifdef USE_IMGUI
 
+			ImGui::Begin("Settings");
+
+			ImGui::CollapsingHeader("Object");
+
+			ImGui::End();
+
 			// ImGui
 			// ImGuiの内部コマンドを生成
 			ImGui::Render();
