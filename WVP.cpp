@@ -64,11 +64,11 @@ Matrix4x4 WVP::WorldViewPortMatrix()
 	Matrix4x4 cameraMatrix = wm4_.MakeAffineMatrix({ 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, CameraPos);
 	Matrix4x4 worldMatrix = wm4_.MakeAffineMatrix({ 1.0f, 1.0f, 1.0f }, rotate, translate);
 	Matrix4x4 viewMatrix = m4_.Inverse(cameraMatrix);
-	Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(KWindowWidth) / float(KWindowHeight), 0.1f, 100.0f);
+	Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(KWindowWidth) / float(kWindowHeight), 0.1f, 100.0f);
 
 	//  WorldViewProjectionMatrix、略してWVPMatrixを作る
 	Matrix4x4 wvpMatrix = m4_.Multiply(worldMatrix, m4_.Multiply(viewMatrix, projectionMatrix));
-	Matrix4x4 vpMatrix = MakeViewportMatrix(0, 0, float(KWindowWidth), float(KWindowHeight), 0.0f, 1.0f);
+	Matrix4x4 vpMatrix = MakeViewportMatrix(0, 0, float(KWindowWidth), float(kWindowHeight), 0.0f, 1.0f);
 
 	for (uint32_t i = 0; i < 3; ++i) {
 		Vector3 ndcVertex = makeMatrix_.Transform(kLocalVertices[i], wvpMatrix);

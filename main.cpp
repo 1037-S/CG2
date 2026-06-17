@@ -228,6 +228,11 @@ Transform transform{
 	{0.0f,0.0f,0.0f},
 	{0.0f,0.0f,0.0f},
 };
+Transform transformSprite{
+	{1.0f,1.0f,1.0f},
+	{0.0f,0.0f,0.0f},
+	{0.0f,0.0f,0.0f},
+};
 //Transform transformB{
 //	{1.0f,1.0f,1.0f},
 //	{0.0f,0.0f,0.0f},
@@ -893,7 +898,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	vertexData[4].position = { 0.0f,0.0f,0.0f,1.0f };
 	vertexData[4].texCoord = { 0.5f,0.0f };
 	// 右下その２
-	vertexData[5].position = { 0.5f,-0.5f,0. - 0.5f,1.0f };
+	vertexData[5].position = { 0.5f,-0.5f,-0.5f,1.0f };
 	vertexData[5].texCoord = { 1.0f,1.0f };
 	// ビューポート
 	D3D12_VIEWPORT viewport{};
@@ -921,6 +926,51 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// 色を書き込む
 	*materialData = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 
+	// スプライト用の頂点リソースを作る
+	ID3D12Resource* vertexResourceSprite = CreateBufferResouce(device, sizeof(VertexData) * 6);
+
+	// 頂点バッファビューを作る
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSprite{};
+	// リソースの先頭のアドレスから使う
+	vertexBufferViewSprite.BufferLocation = vertexResourceSprite->GetGPUVirtualAddress();
+	// 使用するリソースのサイズは頂点３つ分のサイズ
+	vertexBufferViewSprite.SizeInBytes = sizeof(VertexData) * 6;
+	// 1頂点あたりのサイズ
+	vertexBufferViewSprite.StrideInBytes = sizeof(VertexData);
+
+	VertexData* vertexDataSprite = nullptr;
+	// 書き込むためのアドレスを取得
+	vertexResourceSprite->Map(0, nullptr,
+		reinterpret_cast<void**>(&vertexDataSprite));
+	// 左下
+	vertexDataSprite[0].position = { 0.0f,360.0f,0.0f,1.0f }; // 左下
+	vertexDataSprite[0].texCoord = { 0.0f,1.0f };
+	// 上
+	vertexDataSprite[1].position = { 0.0f,0.0f,0.0f,1.0f }; // 左上
+	vertexDataSprite[1].texCoord = { 0.0f,0.0f };
+	// 右下
+	vertexDataSprite[2].position = { 640.0f,360.0f,0.0f,1.0f }; // 右下
+	vertexDataSprite[2].texCoord = { 1.0f,1.0f };
+	// 左下その２
+	vertexDataSprite[3].position = { 0.0f,0.0f,0.0f,1.0f }; // 左上
+	vertexDataSprite[3].texCoord = { 0.0f,0.0f };
+	// 上その２
+	vertexDataSprite[4].position = { 640.0f,0.0f,0.0f,1.0f }; // 右上
+	vertexDataSprite[4].texCoord = { 1.0f,0.0f };
+	// 右下その２
+	vertexDataSprite[5].position = { 640.0f,360.0f,0.0f,1.0f }; // 右下
+	vertexDataSprite[5].texCoord = { 1.0f,1.0f };
+
+
+	// Sprite用のTransformationMatrix用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
+	ID3D12Resource* transformationMatrixResourceSprite = CreateBufferResouce(device, sizeof(Matrix4x4));
+	// マテリアルにデータを書き込む
+	Matrix4x4* transformationMatrixDataSprite = nullptr;
+	// 書き込むためのアドレスを取得
+	transformationMatrixResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDataSprite));
+
+	// 単位行列を書きこむ
+	*transformationMatrixDataSprite = m4.MakeIdentity4x4();
 
 	// WVP用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
 	WVP wvp{};
@@ -990,10 +1040,18 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			Matrix4x4 worldMatrix = wm4.MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 			Matrix4x4 cameraMatrix = wm4.MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
 			Matrix4x4 viewMatrix = m4.Inverse(cameraMatrix);
-			Matrix4x4 viewProjectionMatrix = wvp.MakePerspectiveFovMatrix(0.45f, float(KWindowWidth) / float(KWindowHeight), 0.1f, 100.0f);
+			Matrix4x4 viewProjectionMatrix = wvp.MakePerspectiveFovMatrix(0.45f, float(KWindowWidth) / float(kWindowHeight), 0.1f, 100.0f);
 			// wvpMatrixを作る
 			Matrix4x4 worldViewProjectionMatrix = m4.Multiply(worldMatrix, m4.Multiply(viewMatrix, viewProjectionMatrix));
 			*wvpData = worldViewProjectionMatrix;
+
+			// sprite用のWorldViewProjectionMatrixを作る
+			Matrix4x4 worldMatrixSprite = wm4.MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
+			Matrix4x4 viewMatrixSprite = m4.MakeIdentity4x4(); 
+			Matrix4x4 ProjectionMatrixSprite = wvp.MakeOrthographicMatrix(0.0f,0.0f, float(kClientWidth) , float(kClientHeight), 0.1f, 100.0f);
+			// wvpMatrixを作る
+			Matrix4x4 worldViewProjectionMatrixSprite = m4.Multiply(worldMatrixSprite, m4.Multiply(viewMatrixSprite, ProjectionMatrixSprite));
+			*transformationMatrixDataSprite = worldViewProjectionMatrixSprite;
 
 			// これから書き込むバックバッファのインデックスを取得
 			UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
@@ -1004,6 +1062,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 			if (ImGui::CollapsingHeader("Object"))
 			{
+				if (ImGui::CollapsingHeader("Triangle"))
+				{
 				ImGui::DragFloat3("Translate", reinterpret_cast<float*>(&transform.translate), 0.1f);
 				ImGui::DragFloat3("Rotate", reinterpret_cast<float*>(&transform.rotate), 0.1f);
 				ImGui::DragFloat3("Scale", reinterpret_cast<float*>(&transform.scale), 0.1f);
@@ -1013,9 +1073,19 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 					transform.rotate = { 0.0f,0.0f,0.0f };
 					transform.scale = { 1.0f,1.0f,1.0f };
 				}
-				if (ImGui::CollapsingHeader("Material"))
-				{
 
+				}
+				if (ImGui::CollapsingHeader("Quad"))
+				{
+					ImGui::DragFloat3("Translate", reinterpret_cast<float*>(&transformSprite.translate), 0.1f);
+					ImGui::DragFloat3("Rotate", reinterpret_cast<float*>(&transformSprite.rotate), 0.1f);
+					ImGui::DragFloat3("Scale", reinterpret_cast<float*>(&transformSprite.scale), 0.1f);
+					if (ImGui::Button("Delete"))
+					{
+						transformSprite.translate = { 0.0f,0.0f,0.0f };
+						transformSprite.rotate = { 0.0f,0.0f,0.0f };
+						transformSprite.scale = { 1.0f,1.0f,1.0f };
+					}
 				}
 			}
 			
@@ -1073,6 +1143,15 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 			// SRVのDescriptorTableの先頭を設定。2はrootParameter[2]である
 			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+
+			// 描画!(DrawCall/ドローコール)。3頂点で1つのインスタンス。インスタンスについてはまた今度
+			commandList->DrawInstanced(6, 1, 0, 0);
+
+			// Spriteの描画。
+			commandList->IASetVertexBuffers(0,1,&vertexBufferViewSprite);	//VBV(VertexBufferView)を設定
+
+			// TransformationMatrixCBufferの場所を設定
+			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
 
 			// 描画!(DrawCall/ドローコール)。3頂点で1つのインスタンス。インスタンスについてはまた今度
 			commandList->DrawInstanced(6, 1, 0, 0);

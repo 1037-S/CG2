@@ -14,4 +14,4 @@ static const int kColumnWidth = 60;
 static const int kRowHeight = 20;
 
 const int KWindowWidth = 1280;
-const int KWindowHeight = 720;
+const int kWindowHeight = 720;
