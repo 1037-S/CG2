@@ -1040,7 +1040,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			Matrix4x4 worldMatrix = wm4.MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 			Matrix4x4 cameraMatrix = wm4.MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
 			Matrix4x4 viewMatrix = m4.Inverse(cameraMatrix);
-			Matrix4x4 viewProjectionMatrix = wvp.MakePerspectiveFovMatrix(0.45f, float(KWindowWidth) / float(kWindowHeight), 0.1f, 100.0f);
+			Matrix4x4 viewProjectionMatrix = wvp.MakePerspectiveFovMatrix(0.45f, float(kWindowWidth) / float(kWindowHeight), 0.1f, 100.0f);
 			// wvpMatrixを作る
 			Matrix4x4 worldViewProjectionMatrix = m4.Multiply(worldMatrix, m4.Multiply(viewMatrix, viewProjectionMatrix));
 			*wvpData = worldViewProjectionMatrix;
