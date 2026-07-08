@@ -14,6 +14,7 @@
 #include <cstdint>
 #include <string>
 #include <format>
+#include "OBJECT.h"
 #include "WVP.h"
 #include "WM4.h"
 #include "M4.h"
@@ -201,26 +202,13 @@ IDxcBlob* CompileShader(
 	return shaderBlob;
 }
 
-struct Vector2
-{
-	float x;
-	float y;
-};
 
-struct Vector4
-{
-	float x;
-	float y;
-	float z;
-	float w;
-};
-
-struct Transform
-{
-	Vector3 scale;
-	Vector3 rotate;
-	Vector3 translate;
-};
+//struct Transform
+//{
+//	Vector3 scale;
+//	Vector3 rotate;
+//	Vector3 translate;
+//};
 
 WorldM4 wm4;
 Matrix4 m4;
@@ -251,6 +239,18 @@ struct VertexData
 	Vector4 position;
 	Vector2 texCoord;
 	Vector3 normal;
+};
+
+struct Material
+{
+	Vector4 color;
+	int32_t enebleLightng;
+};
+
+struct TransformationMatrix
+{
+	Matrix4x4 WVP;
+	Matrix4x4 world;
 };
 
 // 頂点関数
@@ -482,12 +482,12 @@ void DrawSphere(VertexData* vertexData, uint32_t kSubdivision)
 			vertexData[start].normal.y = vertexData[start].position.y;
 			vertexData[start].normal.z = vertexData[start].position.z;
 
-			vertexData[0].normal = {0.0f,0.0f,-1.0f};
-			vertexData[1].normal = {0.0f,0.0f,-1.0f};
-			vertexData[2].normal = {0.0f,0.0f,-1.0f};
-			vertexData[3].normal = {0.0f,0.0f,-1.0f};
-			vertexData[4].normal = {0.0f,0.0f,-1.0f};
-			vertexData[5].normal = {0.0f,0.0f,-1.0f};
+			vertexData[0].normal={0.0f,0.0f,-1.0f};
+			vertexData[1].normal={0.0f,0.0f,-1.0f};
+			vertexData[2].normal={0.0f,0.0f,-1.0f};
+			vertexData[3].normal={0.0f,0.0f,-1.0f};
+			vertexData[4].normal={0.0f,0.0f,-1.0f};
+			vertexData[5].normal={0.0f,0.0f,-1.0f};
 		}
 	}
 }
@@ -893,8 +893,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	inputElementDescs[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 	inputElementDescs[2].SemanticName = "NORMAL";
 	inputElementDescs[2].SemanticIndex = 0;
-	inputElementDescs[2].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	inputElementDescs[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
 	inputElementDescs[2].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	
 	D3D12_INPUT_LAYOUT_DESC inputlayoutdesc{};
 	inputlayoutdesc.pInputElementDescs = inputElementDescs;
 	inputlayoutdesc.NumElements = _countof(inputElementDescs);
@@ -1090,6 +1091,19 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// 単位行列を書きこむ
 	*transformationMatrixDataSprite = m4.MakeIdentity4x4();
 
+	// Sprite用のマテリアルリソースを作る
+	ID3D12Resource* materialResourceSprite = CreateBufferResouce(device,sizeof(Material));
+
+	Material* materialDataSprite = nullptr;
+	materialResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&materialDataSprite));
+
+	materialDataSprite->color = Vector4(1.0f,1.0f,1.0f,1.0f);
+
+	if (materialDataSprite != nullptr)
+	{
+		materialDataSprite->enebleLightng = false;
+	}
+
 	// WVP用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
 	WVP wvp{};
 	ID3D12Resource* wvpResource = CreateBufferResouce(device, sizeof(Matrix4x4));
@@ -1260,7 +1274,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			// 形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばいい
 			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			// マテリアルCBufferの場所を設定
-			commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+			commandList->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
 
 			// wvp用のCbufferの場所を設定
 			commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
