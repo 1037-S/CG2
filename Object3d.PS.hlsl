@@ -4,6 +4,7 @@ struct Material
 {
     float32_t4 color;
     int32_t enebleLighting;
+    //float32_t3 padding;
 };
 
 ConstantBuffer<Material> gMaterial : register(b0);
@@ -33,17 +34,22 @@ PixelShaderOutput main(VertexShaderOutput input)
 
     float32_t4 textureColor = gTexture.Sample(gSampler, input.texcoord);
     
-    output.color = gMaterial.color * textureColor;
-    
-    //if (gMaterial.enebleLighting != 0)
-    //{
-      //  float cos = saturate(dot(normalize(input.normal), -gDirectionalLight.direction));
-     //   output.color = gMaterial.color * textureColor * gDirectionalLight.color * cos * gDirectionalLight.intensity;
-    //}
-    //else
-    //{
-     //   output.color = gMaterial.color * textureColor;
-    //}
+   // output.color = gMaterial.color * textureColor;
+    if (gMaterial.enebleLighting != 0)
+    {
+       
+        // 法線とライトの逆方向の内積から拡散反射の強度（cos）を計算
+        float cos = saturate(dot(normalize(input.normal), -gDirectionalLight.direction));
+        // ライトの影響を加味した色を代入
+       output.color = gMaterial.color * textureColor * gDirectionalLight.color * cos * gDirectionalLight.intensity;
+  
+    }
+    else
+    {
+        // ライトが無効な場合はマテリアルの色×テクスチャの色
+        output.color = gMaterial.color * textureColor;
+    }
+   
     
         return output;
 }
