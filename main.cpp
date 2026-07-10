@@ -1073,23 +1073,23 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	vertexResourceSprite->Map(0, nullptr,
 		reinterpret_cast<void**>(&vertexDataSprite));
 	// 左下
-	vertexDataSprite[0].position = { 0.0f,360.0f,0.0f,1.0f }; // 左下
-	vertexDataSprite[0].texCoord = { 0.0f,1.0f };
-	// 上
-	vertexDataSprite[1].position = { 0.0f,0.0f,0.0f,1.0f }; // 左上
-	vertexDataSprite[1].texCoord = { 0.0f,0.0f };
-	// 右下
-	vertexDataSprite[2].position = { 640.0f,360.0f,0.0f,1.0f }; // 右下
-	vertexDataSprite[2].texCoord = { 1.0f,1.0f };
-	// 左下その２
-	vertexDataSprite[3].position = { 0.0f,0.0f,0.0f,1.0f }; // 左上
-	vertexDataSprite[3].texCoord = { 0.0f,0.0f };
-	// 上その２
-	vertexDataSprite[4].position = { 640.0f,0.0f,0.0f,1.0f }; // 右上
-	vertexDataSprite[4].texCoord = { 1.0f,0.0f };
-	// 右下その２
-	vertexDataSprite[5].position = { 640.0f,360.0f,0.0f,1.0f }; // 右下
-	vertexDataSprite[5].texCoord = { 1.0f,1.0f };
+	//vertexDataSprite[0].position = { 0.0f,360.0f,0.0f,1.0f }; // 左下
+	//vertexDataSprite[0].texCoord = { 0.0f,1.0f };
+	//// 上
+	//vertexDataSprite[1].position = { 0.0f,0.0f,0.0f,1.0f }; // 左上
+	//vertexDataSprite[1].texCoord = { 0.0f,0.0f };
+	//// 右下
+	//vertexDataSprite[2].position = { 640.0f,360.0f,0.0f,1.0f }; // 右下
+	//vertexDataSprite[2].texCoord = { 1.0f,1.0f };
+	//// 左下その２
+	//vertexDataSprite[3].position = { 0.0f,0.0f,0.0f,1.0f }; // 左上
+	//vertexDataSprite[3].texCoord = { 0.0f,0.0f };
+	//// 上その２
+	//vertexDataSprite[4].position = { 640.0f,0.0f,0.0f,1.0f }; // 右上
+	//vertexDataSprite[4].texCoord = { 1.0f,0.0f };
+	//// 右下その２
+	//vertexDataSprite[5].position = { 640.0f,360.0f,0.0f,1.0f }; // 右下
+	//vertexDataSprite[5].texCoord = { 1.0f,1.0f };
 
 	// Sprite用のマテリアルリソースを作る
 	ID3D12Resource* materialResourceSprite = CreateBufferResouce(device, sizeof(Material));
@@ -1234,15 +1234,15 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 				}
 				if (ImGui::CollapsingHeader("Quad"))
 				{
-					ImGui::DragFloat3("Translate", reinterpret_cast<float*>(&transformSprite.translate), 0.1f);
-					ImGui::DragFloat3("Rotate", reinterpret_cast<float*>(&transformSprite.rotate), 0.1f);
-					ImGui::DragFloat3("Scale", reinterpret_cast<float*>(&transformSprite.scale), 0.1f);
-					if (ImGui::Button("Delete"))
-					{
-						transformSprite.translate = { 0.0f,0.0f,0.0f };
-						transformSprite.rotate = { 0.0f,0.0f,0.0f };
-						transformSprite.scale = { 1.0f,1.0f,1.0f };
-					}
+					//ImGui::DragFloat3("Translate", reinterpret_cast<float*>(&transformSprite.translate), 0.1f);
+					//ImGui::DragFloat3("Rotate", reinterpret_cast<float*>(&transformSprite.rotate), 0.1f);
+					//ImGui::DragFloat3("Scale", reinterpret_cast<float*>(&transformSprite.scale), 0.1f);
+					//if (ImGui::Button("Delete"))
+					//{
+					//	transformSprite.translate = { 0.0f,0.0f,0.0f };
+					//	transformSprite.rotate = { 0.0f,0.0f,0.0f };
+					//	transformSprite.scale = { 1.0f,1.0f,1.0f };
+					//}
 				}
 			}
 

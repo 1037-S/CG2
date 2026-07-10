@@ -37,11 +37,11 @@ PixelShaderOutput main(VertexShaderOutput input)
    // output.color = gMaterial.color * textureColor;
     if (gMaterial.enebleLighting != 0)
     {
-       
+        float NdotL = dot(normalize(input.normal), -gDirectionalLight.direction);
         // 法線とライトの逆方向の内積から拡散反射の強度（cos）を計算
-        float cos = saturate(dot(normalize(input.normal), -gDirectionalLight.direction));
+        float cos = pow(NdotL * 0.5f + 0.5f, 2.0f);
         // ライトの影響を加味した色を代入
-       output.color = gMaterial.color * textureColor * gDirectionalLight.color * cos * gDirectionalLight.intensity;
+        output.color = gMaterial.color * textureColor * gDirectionalLight.color * cos * gDirectionalLight.intensity;
   
     }
     else
@@ -51,5 +51,5 @@ PixelShaderOutput main(VertexShaderOutput input)
     }
    
     
-        return output;
+    return output;
 }
