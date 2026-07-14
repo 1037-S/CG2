@@ -81,6 +81,21 @@ Matrix4x4 Matrix4::Multiply(const Matrix4x4& m1, const Matrix4x4& m2) {
 
 	return result;
 }
+Matrix3x3 Matrix4::Multiply(const Matrix3x3& m1, const Matrix3x3& m2)
+{
+	Matrix3x3 result = {};
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			for (int k = 0; k < 3; k++)
+			{
+				result.m[i][j] += m1.m[i][k] * m2.m[k][j];
+			}
+		}
+	}
+	return result;
+}
 // 4.逆行列
 Matrix4x4 Matrix4::Inverse(const Matrix4x4& m) {
 	Matrix4x4 result = {};

@@ -18,6 +18,8 @@
 #include "WVP.h"
 #include "WM4.h"
 #include "M4.h"
+#include "MM.h"
+#include "RTT.h"
 #include "Spheres.h"
 #ifdef USE_IMGUI
 // Imgui
@@ -212,6 +214,9 @@ IDxcBlob* CompileShader(
 
 WorldM4 wm4;
 Matrix4 m4;
+MakeMatrix makeMatrix;
+Rotate rotareMatrix;
+
 Transform transform{
 	{1.0f,1.0f,1.0f},
 	{0.0f,0.0f,0.0f},
@@ -245,13 +250,20 @@ struct Material
 {
 	Vector4 color;
 	bool enebleLighting;
-	//float padding[3];
+	float padding[3];
+	Matrix4x4 uvTransform;
 };
 
 struct TransformationMatrix
 {
 	Matrix4x4 WVP;
 	Matrix4x4 world;
+};
+
+Transform uvTransformSprite{
+	{1.0f,1.0f,1.0f},
+	{0.0f,0.0f,0.0f},
+	{0.0f,0.0f,0.0f},
 };
 
 struct DirectionalLight //!< 平行光源
@@ -1093,13 +1105,17 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	scissorRect.bottom = kClientHeight;
 
 	// マテリアル用のリソースを作る。今回はcolor1つ分のサイズを用意する
-	ID3D12Resource* materialResource = CreateBufferResouce(device, sizeof(Vector4{}));
+	ID3D12Resource* materialResource = CreateBufferResouce(device, sizeof(Material{}));
 	// マテリアルにデータを書き込む
-	Vector4* materialData = nullptr;
+	Material* materialData = nullptr;
 	// 書き込むためのアドレスを取得
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
+
 	// 色を書き込む
-	*materialData = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	materialData->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	materialData->uvTransform = m4.MakeIdentity4x4();
+	
+	
 
 	// スプライト用の頂点リソースを作る
 	ID3D12Resource* vertexResourceSprite = CreateBufferResouce(device, sizeof(VertexData) * 6);
@@ -1180,7 +1196,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	materialDataSprite->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	materialDataSprite->enebleLighting = false;
-
+	materialDataSprite->uvTransform = m4.MakeIdentity4x4();
 
 	// Sprite用のTransformationMatrix用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
 	ID3D12Resource* transformationMatrixResourceSprite = CreateBufferResouce(device, sizeof(TransformationMatrix));
@@ -1285,6 +1301,12 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			transformationMatrixDataSprite->WVP = worldViewProjectionMatrixSprite;
 			transformationMatrixDataSprite->world = worldMatrixSprite;
 
+			Matrix4x4 uvTransformMatrix = makeMatrix.MakeScaleMatrix(uvTransformSprite.scale);
+			uvTransformMatrix = m4.Multiply(uvTransformMatrix,rotareMatrix.MakeRotateZMatrix(uvTransformSprite.rotate.z));
+			uvTransformMatrix = m4.Multiply(uvTransformMatrix,makeMatrix.MakeTransLateMatrix(uvTransformSprite.translate));
+
+			materialDataSprite->uvTransform = uvTransformMatrix;
+
 			// これから書き込むバックバッファのインデックスを取得
 			UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
 
@@ -1324,6 +1346,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 						transformSprite.rotate = { 0.0f,0.0f,0.0f };
 						transformSprite.scale = { 1.0f,1.0f,1.0f };
 					}
+					ImGui::DragFloat2("UVTranslate",&uvTransformSprite.translate.x,0.01f,-10.0f,10.0f);
+					ImGui::DragFloat2("UVScale",&uvTransformSprite.scale.x,0.01f,-10.0f,10.0f);
+					ImGui::SliderAngle("UVRotate",&uvTransformSprite.rotate.z);
 				}
 			}
 

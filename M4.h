@@ -11,6 +11,7 @@ public:
 	Matrix4x4 Subtract(const Matrix4x4& m1, const Matrix4x4& m2);
 	// 3.行列の積
 	Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2);
+	Matrix3x3 Multiply(const Matrix3x3& m1, const Matrix3x3& m2);
 	// 4.逆行列
 	Matrix4x4 Inverse(const Matrix4x4& m);
 	// 5.転置行列

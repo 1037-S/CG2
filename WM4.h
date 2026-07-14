@@ -11,6 +11,7 @@ public:
 
 	// アフィン変換行列
 	Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate);
+	Matrix3x3 MakeAffineMatrix(const Vector2& scale, const Vector2& rotate, const Vector2& translate);
 
 	void Initialize();
 
@@ -23,9 +24,13 @@ private:
 	MakeMatrix make_;
 	Rotate mRotate_;
 
-	Matrix4x4 scaleMatrix_;
-	Matrix4x4 rotateMatrix_;
-	Matrix4x4 translateMatrix_;
+	Matrix3x3 scaleMatrix3_;
+	Matrix3x3 rotateMatrix3_;
+	Matrix3x3 translateMatrix3_;
+
+	Matrix4x4 scaleMatrix4_;
+	Matrix4x4 rotateMatrix4_;
+	Matrix4x4 translateMatrix4_;
 
 	Vector3 scale_;
 	Vector3 rotate_;
