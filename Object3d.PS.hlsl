@@ -3,7 +3,7 @@
 struct Material
 {
     float32_t4 color;
-    int32_t enebleLighting;
+    bool enebleLighting;
     //float32_t3 padding;
 };
 
