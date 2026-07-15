@@ -367,3 +367,4 @@ logs/
 Dumps/
 
 imgui.ini
+!resource/**/*.obj
