@@ -148,6 +148,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(Target)dxil.
     <ClInclude Include="M4.h" />
     <ClInclude Include="MM.h" />
     <ClInclude Include="OBJECT.h" />
+    <ClInclude Include="ResourceObject.h" />
     <ClInclude Include="RTT.h" />
     <ClInclude Include="Spheres.h" />
     <ClInclude Include="V3M.h" />
