@@ -4,17 +4,18 @@
 #include <DbgHelp.h>
 #include <dxgidebug.h>
 #include <dxcapi.h>
+#include <xaudio2.h>
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
 #pragma comment(lib,"Dbghelp.lib")
 #pragma comment(lib,"dxguid.lib")
 #pragma comment(lib,"dxcompiler.lib")
+#pragma comment(lib,"xaudio2.lib")
 #include <strsafe.h>
 #include <Windows.h>
 #include <cstdint>
 #include <string>
 #include <format>
-#include <fstream>
 #include <sstream>
 #include <wrl.h>
 #include "OBJECT.h"
@@ -289,10 +290,38 @@ struct ModelData
 	std::vector<VertexData> vertices;
 	MaterialData material;
 };
+// チャンクヘッダ
+struct ChunkHeader
+{
+	char id[4]; // チャンク毎のID
+	int32_t size; // チャンクサイズ
+};
+// RIFFヘッダチャンク
+struct RiffHeader
+{
+	ChunkHeader chunk;	// "RIFF"
+	char type[4];		// "WAVE"
+};
+// FMTチャンク
+struct FormatChunk
+{
+	ChunkHeader chunk;	// "fmt"
+	WAVEFORMATEX fmt;	// 波形フォーマット
+};
+// 音声データ
+struct SoundData
+{
+	// 波形フォーマット
+	WAVEFORMATEX wfex;
+	// バッファの先頭アドレス
+	BYTE* pBuffer;
+	// バッファのサイズ
+	unsigned int buffersize;
+};
 
 struct D3DResourceLeakChecker
 {
-	~D3DResourceLeakChecker(){
+	~D3DResourceLeakChecker() {
 		// リソースリークチェック
 		Microsoft::WRL::ComPtr<IDXGIDebug1>debug = nullptr;
 		if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&debug))))
@@ -396,7 +425,7 @@ Microsoft::WRL::ComPtr< ID3D12Resource> CreateTextureResource(const Microsoft::W
 
 [[nodiscard]]
 Microsoft::WRL::ComPtr<ID3D12Resource>UploadTextureData(const Microsoft::WRL::ComPtr<ID3D12Resource> texture, const DirectX::ScratchImage& mipImages,
-	const Microsoft::WRL::ComPtr<ID3D12Device> device,const Microsoft::WRL::ComPtr< ID3D12GraphicsCommandList> commandList)
+	const Microsoft::WRL::ComPtr<ID3D12Device> device, const Microsoft::WRL::ComPtr< ID3D12GraphicsCommandList> commandList)
 {
 	// Meta情報を取得
 	//const DirectX::TexMetadata& metaData = mipImages.GetMetadata();
@@ -710,6 +739,105 @@ D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(ID3D12DescriptorHeap* descrip
 	return handleGPU;
 }
 
+SoundData SoundLoadWave(const char* filename) {
+
+	// 1. ファイルオープン
+	// ファイル入力ストリームのインスタンス
+	std::ifstream file;
+	// .wawデータをバイナリモードで開く
+	file.open(filename, std::ios_base::binary);
+	//ファイルオープン失敗を検出する
+	assert(file.is_open());
+	// 2. .wawデータ読み込み
+	// RIFFヘッダーの読み込み
+	RiffHeader riff;
+	file.read((char*)&riff, sizeof(riff));
+	// ファイルがRIFFかチェックする
+	if (strncmp(riff.chunk.id, "RIFF", 4) != 0)
+	{
+		assert(0);
+	}
+	// ファイルがWAVEかチェックする
+	if (strncmp(riff.type, "WAVE", 4) != 0)
+	{
+		assert(0);
+	}
+	// Formatチャンクの読み込み
+	FormatChunk format = {};
+	// チャンクヘッダーの確認
+	file.read((char*)&format, sizeof(ChunkHeader));
+	if (strncmp(format.chunk.id, "fmt", 4) != 0)
+	{
+		assert(0);
+	}
+	// チャンク本体の読み込み
+	assert(format.chunk.size <= sizeof(format.fmt));
+	file.read((char*)&format.fmt, format.chunk.size);
+	// Dataチャンクの読み込み
+	ChunkHeader data;
+	file.read((char*)&data, sizeof(data));
+	// JUNKチャンクを読み込み
+	if (strncmp(data.id, "JUNK", 4) == 0)
+	{
+		// 読み取り位置をJUNKチャンクの終わりまで進める
+		file.seekg(data.size, std::ios_base::cur
+		);
+		// 再読み込み
+		file.read((char*)&data, sizeof(data));
+	}
+	if (strncmp(data.id, "data", 4) != 0)
+	{
+		assert(0);
+	}
+	// Dataチャンクのデータ節(波形データ)の読み込み
+	char* pBuffer = new char[data.size];
+	file.read(pBuffer,data.size);
+	// 3. ファイルクローズ
+	file.close();
+	// 4. 読み込んだデータをreturnする
+	// returnする為の音声データ
+	SoundData soundDsta = {};
+
+	soundDsta.wfex = format.fmt;
+	soundDsta.pBuffer = reinterpret_cast<BYTE*>(pBuffer);
+	soundDsta.buffersize = data.size;
+
+	return soundDsta;
+}
+
+// 音声データの解放
+void SoundUnload(SoundData* soundData) {
+	// バッファのメモリを解放
+	delete[] soundData->pBuffer;
+
+	soundData->pBuffer = 0;
+	soundData->buffersize = 0;
+	soundData->wfex = {};
+}
+
+// 音声を再生
+void SoundPlayWave(IXAudio2* xAudio2, const SoundData& soundData) {
+
+	HRESULT hr;
+
+	// 波形フォーマットを元にSourceVoiceの生成
+	IXAudio2SourceVoice* pSourceVoice = nullptr;
+	hr = xAudio2->CreateSourceVoice(&pSourceVoice, &soundData.wfex);
+	assert(SUCCEEDED(hr));
+
+	// 再生する波形データの設定
+	XAUDIO2_BUFFER buf{};
+	buf.pAudioData = soundData.pBuffer;
+	buf.AudioBytes = soundData.buffersize;
+	buf.Flags = XAUDIO2_END_OF_STREAM;
+
+	// 波形データの再生
+	hr = pSourceVoice->SubmitSourceBuffer(&buf);
+	assert(SUCCEEDED(hr));
+	hr = pSourceVoice->Start();
+	assert(SUCCEEDED(hr));
+}
+
 bool useMonsterBall = true;
 ModelData modelData;
 
@@ -811,6 +939,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 
 
+
 	// DXGIファクトリーの生成
 	Microsoft::WRL::ComPtr<IDXGIFactory7>dxgiFactory = nullptr;
 	// HRESULTはWindows系のエラーコードであり、
@@ -896,7 +1025,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		// 指定したメッセージの表示を抑制する
 		infoQueue->PushStorageFilter(&filter);
 		// 解放
-		infoQueue->Release();
+		//infoQueue->Release();
 	}
 
 #endif // _DEBUG
@@ -1387,8 +1516,37 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	wvpData->WVP = wvp.WorldViewPortMatrix();
 	wvpData->world = wvp.WorldViewPortMatrix();
 
+	Microsoft::WRL::ComPtr<IXAudio2>xAudio2;
+	IXAudio2MasteringVoice* masterVoice;
 
+	// XAudioエンジンのインスタンスを生成
+	hr = XAudio2Create(&xAudio2, 0, XAUDIO2_DEFAULT_PROCESSOR);
+	assert(SUCCEEDED(hr));
+	// マスターボイスを生成
+	hr = xAudio2->CreateMasteringVoice(&masterVoice);
+	assert(SUCCEEDED(hr));
 
+	// 音声読み込み
+	SoundData soundData1 = SoundLoadWave("resources/fanfare.wav");
+
+	// 音声の再生
+	SoundPlayWave(xAudio2.Get(), soundData1);
+
+	IXAudio2SourceVoice* pSourceVoice = nullptr;
+	hr = xAudio2->CreateSourceVoice(&pSourceVoice, &soundData1.wfex);
+	assert(SUCCEEDED(hr));
+
+	// 一度だけ再生をキューに入れておく（あるいは特定のキーが押されたら再生する）
+	XAUDIO2_BUFFER buf{};
+	buf.pAudioData = soundData1.pBuffer;
+	buf.AudioBytes = soundData1.buffersize;
+	buf.Flags = XAUDIO2_END_OF_STREAM;
+	hr = pSourceVoice->SubmitSourceBuffer(&buf);
+	assert(SUCCEEDED(hr));
+
+	// 自動で1回だけ再生を開始するならここでStart
+	hr = pSourceVoice->Start();
+	assert(SUCCEEDED(hr));
 
 	MSG msg{};
 #ifdef USE_IMGUI
@@ -1463,6 +1621,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			// これから書き込むバックバッファのインデックスを取得
 			UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
 
+			
 #ifdef USE_IMGUI
 
 			ImGui::Begin("Settings");
@@ -1544,7 +1703,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 			// 描画用のDescriptorHeapの設定
-			Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeaps[] = { srvDescriptorHeap.Get()};
+			Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeaps[] = { srvDescriptorHeap.Get() };
 			commandList->SetDescriptorHeaps(1, descriptorHeaps->GetAddressOf());
 
 			// コマンドを積む
@@ -1606,7 +1765,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			assert(SUCCEEDED(hr));
 
 			// GPUにコマンドリストの実行を行わせる
-			Microsoft::WRL::ComPtr <ID3D12CommandList> commandLists[] = { commandList.Get()};
+			Microsoft::WRL::ComPtr <ID3D12CommandList> commandLists[] = { commandList.Get() };
 			commandQueue->ExecuteCommandLists(1, commandLists->GetAddressOf());
 			// GPUとOSに画面の交換を行うように通知する
 			swapChain->Present(1, 0);
@@ -1658,6 +1817,15 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	CoUninitialize();
 	CloseHandle(fenceEvent);
 
+	// XAudio2解放の前にボイスを破棄
+	if (pSourceVoice) {
+		pSourceVoice->DestroyVoice();
+	}
+
+	// 音声データ解放
+	SoundUnload(&soundData1);
+	// XAudio2解放
+	xAudio2.Reset();
 	//ResourceObject depthStancilResource =
 	//	CreareDepthStencilTextureResource(device.Get(), kClientWidth, kClientHeight).Get();
 
