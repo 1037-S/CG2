@@ -1,3 +1,5 @@
+#define DIRECTINPUT_VERSION  0x0800
+#include <dinput.h>
 #include <d3d12.h>
 #include <dxgi1_6.h>
 #include <cassert>
@@ -11,6 +13,8 @@
 #pragma comment(lib,"dxguid.lib")
 #pragma comment(lib,"dxcompiler.lib")
 #pragma comment(lib,"xaudio2.lib")
+#pragma comment(lib,"dinput8.lib")
+#pragma comment(lib,"dxguid.lib")
 #include <strsafe.h>
 #include <Windows.h>
 #include <cstdint>
@@ -766,7 +770,7 @@ SoundData SoundLoadWave(const char* filename) {
 	FormatChunk format = {};
 	// チャンクヘッダーの確認
 	file.read((char*)&format, sizeof(ChunkHeader));
-	if (strncmp(format.chunk.id, "fmt", 4) != 0)
+	if (strncmp(format.chunk.id, "fmt ", 4) != 0)
 	{
 		assert(0);
 	}
@@ -1084,6 +1088,26 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	const uint32_t descriptorSizeRTV = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	const uint32_t descriptorSizeDSV = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 
+
+	// DirectInputの初期化
+	IDirectInput8* directInput = nullptr;
+	hr = DirectInput8Create(wc.hInstance,DIRECTINPUT_VERSION,IID_IDirectInput8,
+		(void**)&directInput,nullptr);
+	assert(SUCCEEDED(hr));
+
+	// キーボードデバイスの初期化
+	IDirectInputDevice8* keyboard = nullptr;
+	hr = directInput->CreateDevice(GUID_SysKeyboard,&keyboard,NULL);
+	assert(SUCCEEDED(hr));
+
+	// 入力データ形式のセット
+	hr = keyboard->SetDataFormat(&c_dfDIKeyboard); // 標準形式
+	assert(SUCCEEDED(hr));
+
+	// 排他制御レベルのセット
+	hr = keyboard->SetCooperativeLevel(
+	hwnd,DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
+	assert(SUCCEEDED(hr));
 
 	// RTVの設定
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
@@ -1575,11 +1599,26 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
+			
 		}
 		else {
 
 			//ゲームの処理
+			// キーボードの取得開始
+			keyboard->Acquire();
+			// すべてのキーの「入力状態を取得する
+			BYTE key[256] = {};
+			keyboard->GetDeviceState(sizeof(key), key);
 
+			if (key[DIK_0])
+			{
+				OutputDebugStringA("Hit 0\n");
+			}
+
+			bool preKeys(uint8_t key);
+			bool NotPreKeys(uint8_t key);
+			bool keys(uint8_t key);
+			bool NotKeys(uint8_t key);
 #ifdef USE_IMGUI
 			// ImGui
 			ImGui_ImplDX12_NewFrame();
@@ -1829,34 +1868,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//ResourceObject depthStancilResource =
 	//	CreareDepthStencilTextureResource(device.Get(), kClientWidth, kClientHeight).Get();
 
-	//fence->Release();
-	//rtvDescriptorHeap->Release();
-	//swapChainResources[0]->Release();
-	//swapChainResources[1]->Release();
-	//swapChain->Release();
-	//commandList->Release();
-	//commandAllocator->Release();
-	//commandQueue->Release();
-	//device->Release();
-	//useAdapter->Release();
-	//dxgiFactory->Release();
-	//depthStencilResource->Release();
-	//DSVdescriptorHeap->Release();
-#ifdef _DEBUG
-	//debugController->Release();
-#endif // _DEBUG
-	//vertexResource->Release();
-	//graphicsPipelineState->Release();
-	//signatureBlob->Release();
-	//if (errorBlob)
-	//{
-	//	errorBlob->Release();
-	//}
-	//rootSignature->Release();
-	//pixelShaderBlob->Release();
-	//vertexShaderBlob->Release();
-	//materialResource->Release();
-	//intermediateResource->Release();
 	CloseWindow(hwnd);
 
 	return 0;
