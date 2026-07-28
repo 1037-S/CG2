@@ -28,6 +28,7 @@
 #include "M4.h"
 #include "MM.h"
 #include "RTT.h"
+#include "DebugCamera.h"
 #include "Spheres.h"
 #include "ResourceObject.h"
 #ifdef USE_IMGUI
@@ -1095,6 +1096,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		(void**)&directInput,nullptr);
 	assert(SUCCEEDED(hr));
 
+	DebugCamera debugCamera;
+	debugCamera.Initialize();
+
 	// キーボードデバイスの初期化
 	IDirectInputDevice8* keyboard = nullptr;
 	hr = directInput->CreateDevice(GUID_SysKeyboard,&keyboard,NULL);
@@ -1615,10 +1619,12 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 				OutputDebugStringA("Hit 0\n");
 			}
 
-			bool preKeys(uint8_t key);
-			bool NotPreKeys(uint8_t key);
-			bool keys(uint8_t key);
-			bool NotKeys(uint8_t key);
+			debugCamera.Update(key);
+
+			//bool preKeys(uint8_t key);
+			//bool NotPreKeys(uint8_t key);
+			//bool keys(uint8_t key);
+			//bool NotKeys(uint8_t key);
 #ifdef USE_IMGUI
 			// ImGui
 			ImGui_ImplDX12_NewFrame();
@@ -1633,10 +1639,12 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			// 関数
 			//transform.rotate.y += 0.03f;
 
+
+
 			Matrix4x4 worldMatrix = wm4.MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 			Matrix4x4 cameraMatrix = wm4.MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
 			Matrix4x4 viewMatrix = m4.Inverse(cameraMatrix);
-			Matrix4x4 viewProjectionMatrix = wvp.MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
+			Matrix4x4 viewProjectionMatrix = debugCamera.GetViewProjectionMatrix();
 			// wvpMatrixを作る
 			Matrix4x4 worldViewProjectionMatrix = m4.Multiply(worldMatrix, m4.Multiply(viewMatrix, viewProjectionMatrix));
 			wvpData->WVP = worldViewProjectionMatrix;

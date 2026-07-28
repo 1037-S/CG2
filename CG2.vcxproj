@@ -91,7 +91,16 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(Target)dxil.
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Audio.cpp" />
+    <ClCompile Include="CrashDump.cpp" />
     <ClCompile Include="DebugCamera.cpp" />
+    <ClCompile Include="DirectXCommon.cpp" />
+    <ClCompile Include="Framework.cpp" />
+    <ClCompile Include="ImguiManager.cpp" />
+    <ClCompile Include="Input.cpp" />
+    <ClCompile Include="Model.cpp" />
+    <ClCompile Include="MyGame.cpp" />
+    <ClCompile Include="Object3D.cpp" />
     <ClCompile Include="Polygon.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -117,8 +126,12 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(Target)dxil.
     <ClCompile Include="M4.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MM.cpp" />
+    <ClCompile Include="RPV2.cpp" />
     <ClCompile Include="RTT.cpp" />
+    <ClCompile Include="Sprite.cpp" />
+    <ClCompile Include="StringUtility.cpp" />
     <ClCompile Include="V3M.cpp" />
+    <ClCompile Include="Winapp.cpp" />
     <ClCompile Include="WM4.cpp" />
     <ClCompile Include="WVP.cpp" />
   </ItemGroup>
@@ -137,7 +150,16 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(Target)dxil.
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Audio.h" />
+    <ClInclude Include="CrashDump.h" />
     <ClInclude Include="DebugCamera.h" />
+    <ClInclude Include="DirectXCommon.h" />
+    <ClInclude Include="Framework.h" />
+    <ClInclude Include="ImguiManager.h" />
+    <ClInclude Include="Input.h" />
+    <ClInclude Include="Model.h" />
+    <ClInclude Include="MyGame.h" />
+    <ClInclude Include="Object3D.h" />
     <ClInclude Include="Polygon.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />
     <ClInclude Include="externals\imgui\imgui.h" />
@@ -151,9 +173,13 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(Target)dxil.
     <ClInclude Include="MM.h" />
     <ClInclude Include="OBJECT.h" />
     <ClInclude Include="ResourceObject.h" />
+    <ClInclude Include="RPV2.h" />
     <ClInclude Include="RTT.h" />
     <ClInclude Include="Spheres.h" />
+    <ClInclude Include="Sprite.h" />
+    <ClInclude Include="StringUtility.h" />
     <ClInclude Include="V3M.h" />
+    <ClInclude Include="Winapp.h" />
     <ClInclude Include="WM4.h" />
     <ClInclude Include="WVP.h" />
   </ItemGroup>

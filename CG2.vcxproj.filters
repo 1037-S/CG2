@@ -25,6 +25,54 @@
     <Filter Include="imgui">
       <UniqueIdentifier>{e18733ce-c0b8-490e-9814-ae4f900a21ad}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ヘッダー ファイル\Engine">
+      <UniqueIdentifier>{3946529d-0f64-4f2d-ad0d-4d2baf602aac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\Base">
+      <UniqueIdentifier>{4b8894c0-ed3a-4f8d-b129-caf25ca86d13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\Input">
+      <UniqueIdentifier>{17c7110f-5bde-4641-a813-107f23e74414}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\Audio">
+      <UniqueIdentifier>{66f6ac5c-53b9-4ce2-83ba-541d5101233e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\3D">
+      <UniqueIdentifier>{a4cd3ae5-243b-4d64-8312-40116a6b2326}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\2D">
+      <UniqueIdentifier>{da3f66a8-e095-4ae0-af08-8128495efa73}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\ImguiManager">
+      <UniqueIdentifier>{a2f99693-5e17-49b4-8e86-46b612b518da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Appliacation">
+      <UniqueIdentifier>{90ac84d3-f946-4d10-815e-858d36220381}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine">
+      <UniqueIdentifier>{fffa4b2e-0e19-4952-9fc0-0fac2e1a33ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\Base">
+      <UniqueIdentifier>{f28d66f5-0f71-4860-aef0-00a22afeb182}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\Input">
+      <UniqueIdentifier>{feced11b-b323-4999-8ac4-909466d3373d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\Audio">
+      <UniqueIdentifier>{5f66890d-3c1f-4a17-89be-3059c70fc7b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\3D">
+      <UniqueIdentifier>{1895f6c3-d8de-4f83-8975-a4c51ad8fef4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\2D">
+      <UniqueIdentifier>{03a1761b-b19b-4321-bbba-191edd97fe59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\ImguiManager">
+      <UniqueIdentifier>{84e3b1c4-e5e1-4341-a2be-1018a662448e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Application">
+      <UniqueIdentifier>{e884282b-6321-4946-9e40-14261fa82ba9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -74,6 +122,45 @@
     </ClCompile>
     <ClCompile Include="DebugCamera.cpp">
       <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXCommon.cpp">
+      <Filter>ソース ファイル\Engine\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Winapp.cpp">
+      <Filter>ソース ファイル\Engine\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="StringUtility.cpp">
+      <Filter>ソース ファイル\Engine\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="CrashDump.cpp">
+      <Filter>ソース ファイル\Engine\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Input.cpp">
+      <Filter>ソース ファイル\Engine\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="ImguiManager.cpp">
+      <Filter>ソース ファイル\Engine\ImguiManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Audio.cpp">
+      <Filter>ソース ファイル\Engine\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="Object3D.cpp">
+      <Filter>ソース ファイル\Engine\3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>ソース ファイル\Engine\3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Sprite.cpp">
+      <Filter>ソース ファイル\Engine\2D</Filter>
+    </ClCompile>
+    <ClCompile Include="MyGame.cpp">
+      <Filter>ソース ファイル\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework.cpp">
+      <Filter>ソース ファイル\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="RPV2.cpp">
+      <Filter>数学関数\ソースファイル</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -137,6 +224,45 @@
     </ClInclude>
     <ClInclude Include="DebugCamera.h">
       <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Winapp.h">
+      <Filter>ヘッダー ファイル\Engine\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXCommon.h">
+      <Filter>ヘッダー ファイル\Engine\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="StringUtility.h">
+      <Filter>ヘッダー ファイル\Engine\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="CrashDump.h">
+      <Filter>ヘッダー ファイル\Engine\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Audio.h">
+      <Filter>ヘッダー ファイル\Engine\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="Input.h">
+      <Filter>ヘッダー ファイル\Engine\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Object3D.h">
+      <Filter>ヘッダー ファイル\Engine\3D</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>ヘッダー ファイル\Engine\3D</Filter>
+    </ClInclude>
+    <ClInclude Include="Sprite.h">
+      <Filter>ヘッダー ファイル\Engine\2D</Filter>
+    </ClInclude>
+    <ClInclude Include="ImguiManager.h">
+      <Filter>ヘッダー ファイル\Engine\ImguiManager</Filter>
+    </ClInclude>
+    <ClInclude Include="MyGame.h">
+      <Filter>ヘッダー ファイル\Appliacation</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework.h">
+      <Filter>ヘッダー ファイル\Appliacation</Filter>
+    </ClInclude>
+    <ClInclude Include="RPV2.h">
+      <Filter>数学関数\ヘッダーファイル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
