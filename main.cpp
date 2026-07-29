@@ -228,7 +228,7 @@ Matrix4 m4;
 MakeMatrix makeMatrix;
 Rotate rotareMatrix;
 
-Transform transform{
+Transform transformModel{
 	{1.0f,1.0f,1.0f},
 	{0.0f,0.0f,0.0f},
 	{0.0f,0.0f,0.0f},
@@ -238,11 +238,11 @@ Transform transformSprite{
 	{0.0f,0.0f,0.0f},
 	{0.0f,0.0f,0.0f},
 };
-//Transform transformB{
-//	{1.0f,1.0f,1.0f},
-//	{0.0f,0.0f,0.0f},
-//	{0.0f,0.0f,0.5f},
-//};
+Transform transformSphere{
+	{1.0f,1.0f,1.0f},
+	{0.0f,0.0f,0.0f},
+	{2.0f,0.0f,0.0f},
+};
 Transform cameraTransform{
 	{1.0f,1.0f,1.0f},
 	{0.0f,0.0f,0.0f},
@@ -1353,6 +1353,36 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	uint32_t startIndex = kSphereSubdivision * kSphereSubdivision * 6;
 
+	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResourceModel = CreateBufferResouce(device, sizeof(TransformationMatrix));
+	TransformationMatrix* wvpDataModel = nullptr;
+	wvpResourceModel->Map(0, nullptr, reinterpret_cast<void**>(&wvpDataModel));
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResourceSphere = CreateBufferResouce(device, sizeof(TransformationMatrix));
+	TransformationMatrix* wvpDataSphere = nullptr;
+	wvpResourceSphere->Map(0, nullptr, reinterpret_cast<void**>(&wvpDataSphere));
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResourceModel =
+		CreateBufferResouce(device, sizeof(VertexData) * modelData.vertices.size());
+
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewModel{};
+	vertexBufferViewModel.BufferLocation = vertexResourceModel->GetGPUVirtualAddress();
+	vertexBufferViewModel.SizeInBytes = UINT(sizeof(VertexData) * modelData.vertices.size());
+	vertexBufferViewModel.StrideInBytes = sizeof(VertexData);
+
+	VertexData* vertexDataModel = nullptr;
+	vertexResourceModel->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataModel));
+	std::memcpy(vertexDataModel, modelData.vertices.data(), sizeof(VertexData)* modelData.vertices.size());
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResourceSphere =
+		CreateBufferResouce(device, sizeof(VertexData) * totalVertices);
+
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSphere{};
+	vertexBufferViewSphere.BufferLocation = vertexResourceSphere->GetGPUVirtualAddress();
+	vertexBufferViewSphere.SizeInBytes = UINT(sizeof(VertexData) * totalVertices);
+	vertexBufferViewSphere.StrideInBytes = sizeof(VertexData);
+
+	VertexData* vertexDataSphere = nullptr;
+	vertexResourceSphere->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSphere));
 
 	// 頂点関数
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource = CreateBufferResouce(device, sizeof(VertexData) * totalVertices);
@@ -1491,7 +1521,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	uint32_t* indexDataSphere = nullptr;
 	indexResourceSphere->Map(0, nullptr, reinterpret_cast<void**>(&indexDataSphere));
 
-	DrawSphere(vertexData, indexDataSphere, kSphereSubdivision);
+	DrawSphere(vertexDataSphere, indexDataSphere, kSphereSubdivision);
 
 	// Sprite用のマテリアルリソースを作る
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialResourceSprite = CreateBufferResouce(device, sizeof(Material));
@@ -1633,14 +1663,22 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			// 関数
 			//transform.rotate.y += 0.03f;
 
-			Matrix4x4 worldMatrix = wm4.MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
+			//Matrix4x4 worldMatrix = wm4.MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 			Matrix4x4 cameraMatrix = wm4.MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
 			Matrix4x4 viewMatrix = m4.Inverse(cameraMatrix);
 			Matrix4x4 viewProjectionMatrix = wvp.MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 			// wvpMatrixを作る
-			Matrix4x4 worldViewProjectionMatrix = m4.Multiply(worldMatrix, m4.Multiply(viewMatrix, viewProjectionMatrix));
-			wvpData->WVP = worldViewProjectionMatrix;
-			wvpData->world = worldMatrix;
+			//Matrix4x4 worldViewProjectionMatrix = m4.Multiply(worldMatrix, m4.Multiply(viewMatrix, viewProjectionMatrix));
+			//wvpData->WVP = worldViewProjectionMatrix;
+			//wvpData->world = worldMatrix;
+
+			Matrix4x4 worldModel = wm4.MakeAffineMatrix(transformModel.scale, transformModel.rotate, transformModel.translate);
+			wvpDataModel->WVP = m4.Multiply(worldModel, m4.Multiply(viewMatrix, viewProjectionMatrix));
+			wvpDataModel->world = worldModel;
+
+			Matrix4x4 worldSphere = wm4.MakeAffineMatrix(transformSphere.scale, transformSphere.rotate, transformSphere.translate);
+			wvpDataSphere->WVP = m4.Multiply(worldSphere, m4.Multiply(viewMatrix, viewProjectionMatrix));
+			wvpDataSphere->world = worldSphere;
 
 			// sprite用のWorldViewProjectionMatrixを作る
 			Matrix4x4 worldMatrixSprite = wm4.MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
@@ -1671,20 +1709,30 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			{
 				ImGui::DragFloat3("Camera", reinterpret_cast<float*>(&cameraTransform.translate), 0.1f);
 
-				if (ImGui::CollapsingHeader("Triangle"))
+				if (ImGui::CollapsingHeader("Model"))
 				{
-					ImGui::DragFloat3("Translate", reinterpret_cast<float*>(&transform.translate), 0.1f);
-					ImGui::DragFloat3("Rotate", reinterpret_cast<float*>(&transform.rotate), 0.1f);
-					ImGui::DragFloat3("Scale", reinterpret_cast<float*>(&transform.scale), 0.1f);
+					ImGui::DragFloat3("Translate", reinterpret_cast<float*>(&transformModel.translate), 0.1f);
+					ImGui::DragFloat3("Rotate", reinterpret_cast<float*>(&transformModel.rotate), 0.1f);
+					ImGui::DragFloat3("Scale", reinterpret_cast<float*>(&transformModel.scale), 0.1f);
 					if (ImGui::Button("Delete"))
 					{
-						transform.translate = { 0.0f,0.0f,0.0f };
-						transform.rotate = { 0.0f,0.0f,0.0f };
-						transform.scale = { 1.0f,1.0f,1.0f };
+						transformModel.translate = { 0.0f,0.0f,0.0f };
+						transformModel.rotate = { 0.0f,0.0f,0.0f };
+						transformModel.scale = { 1.0f,1.0f,1.0f };
 					}
-					ImGui::ColorEdit4("LightColor", reinterpret_cast<float*>(&directionalLightData->color));
-					ImGui::DragFloat3("LightColor", reinterpret_cast<float*>(&directionalLightData->direction), 0.01f);
-					ImGui::DragFloat("LightIntensity", reinterpret_cast<float*>(&directionalLightData->intensity), 0.01f);
+				}
+				if (ImGui::CollapsingHeader("Sphere"))
+				{
+					ImGui::DragFloat3("Translate", reinterpret_cast<float*>(&transformSphere.translate), 0.1f);
+					ImGui::DragFloat3("Rotate", reinterpret_cast<float*>(&transformSphere.rotate), 0.1f);
+					ImGui::DragFloat3("Scale", reinterpret_cast<float*>(&transformSphere.scale), 0.1f);
+					if (ImGui::Button("Delete"))
+					{
+						transformModel.translate = { 0.0f,0.0f,0.0f };
+						transformModel.rotate = { 0.0f,0.0f,0.0f };
+						transformModel.scale = { 1.0f,1.0f,1.0f };
+					}
+				
 				}
 				if (ImGui::CollapsingHeader("Quad"))
 				{
@@ -1701,10 +1749,17 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 					ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 					ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
 				}
+				if (ImGui::CollapsingHeader("Light"))
+				{
+					ImGui::ColorEdit4("LightColor", reinterpret_cast<float*>(&directionalLightData->color));
+					ImGui::DragFloat3("LightColor", reinterpret_cast<float*>(&directionalLightData->direction), 0.01f);
+					ImGui::DragFloat("LightIntensity", reinterpret_cast<float*>(&directionalLightData->intensity), 0.01f);
+					ImGui::Checkbox("Shadow", &materialDataSprite->enebleLighting);
+				}
 			}
 
 			ImGui::Checkbox("use MonsterBall", &useMonsterBall);
-			ImGui::Checkbox("Shadow", &materialDataSprite->enebleLighting);
+			
 
 			ImGui::End();
 
@@ -1767,7 +1822,17 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 			// 描画!(DrawCall/ドローコール)。3頂点で1つのインスタンス。インスタンスについてはまた今度
 			//commandList->DrawInstanced(startIndex, 1, 0, 0);
+
+			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSphere); // Sphere用VBV
+			commandList->IASetIndexBuffer(&indexBufferViewSphere);         // Sphere用IBV
+			commandList->SetGraphicsRootConstantBufferView(1, wvpResourceSphere->GetGPUVirtualAddress()); // Sphere用WVP
+			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU); // Sphere用テクスチャ
+
 			commandList->DrawIndexedInstanced(startIndex, 1, 0, 0, 0);
+
+			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewModel); // Model用VBV
+			commandList->SetGraphicsRootConstantBufferView(1, wvpResourceModel->GetGPUVirtualAddress()); // Model用WVP
+			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2); // Model用テクスチャ
 
 			commandList->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
 
