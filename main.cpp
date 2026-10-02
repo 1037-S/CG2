@@ -796,7 +796,7 @@ SoundData SoundLoadWave(const char* filename) {
 	}
 	// Dataチャンクのデータ節(波形データ)の読み込み
 	char* pBuffer = new char[data.size];
-	file.read(pBuffer,data.size);
+	file.read(pBuffer, data.size);
 	// 3. ファイルクローズ
 	file.close();
 	// 4. 読み込んだデータをreturnする
@@ -1092,8 +1092,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// DirectInputの初期化
 	IDirectInput8* directInput = nullptr;
-	hr = DirectInput8Create(wc.hInstance,DIRECTINPUT_VERSION,IID_IDirectInput8,
-		(void**)&directInput,nullptr);
+	hr = DirectInput8Create(wc.hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8,
+		(void**)&directInput, nullptr);
 	assert(SUCCEEDED(hr));
 
 	DebugCamera debugCamera;
@@ -1101,7 +1101,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// キーボードデバイスの初期化
 	IDirectInputDevice8* keyboard = nullptr;
-	hr = directInput->CreateDevice(GUID_SysKeyboard,&keyboard,NULL);
+	hr = directInput->CreateDevice(GUID_SysKeyboard, &keyboard, NULL);
 	assert(SUCCEEDED(hr));
 
 	// 入力データ形式のセット
@@ -1110,7 +1110,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// 排他制御レベルのセット
 	hr = keyboard->SetCooperativeLevel(
-	hwnd,DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
+		hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
 	assert(SUCCEEDED(hr));
 
 	// RTVの設定
@@ -1129,11 +1129,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	device->CreateRenderTargetView(swapChainResources[1].Get(), &rtvDesc, rtvHandles[1]);
 
 	// Model読み込み
-	ModelData modelData = LoadObjFile("resources", "plane.obj");
+	ModelData modelData = LoadObjFile("resources/fence", "fence.obj");
 
 
 	// 1枚目のTextureを読んで転送する
-	DirectX::ScratchImage mipImages = LoadTexture("resources/uvChecker.png");
+	DirectX::ScratchImage mipImages = LoadTexture("resources/fence/fence.png");
 	const DirectX::TexMetadata metadata = mipImages.GetMetadata();
 	Microsoft::WRL::ComPtr<ID3D12Resource> textureResource = CreateTextureResource(device, metadata);
 	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource = UploadTextureData(textureResource, mipImages, device, commandList);
@@ -1274,15 +1274,133 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	inputlayoutdesc.pInputElementDescs = inputElementDescs;
 	inputlayoutdesc.NumElements = _countof(inputElementDescs);
 
+	// ブレンドモードごとの PSO を格納する配列
+	//Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineStates[kCountOfBlendMode];
+
+	//for (int i = 0; i < kCountOfBlendMode; i++)
+	//{
+	//	// BlendStateの設定
+	//	D3D12_BLEND_DESC blendDesc{};
+	//	// すべての色要素を書き込む
+	//	blendDesc.RenderTarget[0].RenderTargetWriteMask =
+	//		D3D12_COLOR_WRITE_ENABLE_ALL;
+	//	blendDesc.RenderTarget[0].BlendEnable = true; // ブレンドする
+
+	//	switch (i)
+	//	{
+	//	case kBlendModeNone:
+	//		blendDesc.RenderTarget[0].BlendEnable = false; // ブレンドしない
+	//		break;
+	//	case kBlendModeNormal: // Normal合成
+	//	{
+	//		blendDesc.RenderTarget[0].SrcBlend
+	//			= D3D12_BLEND_SRC_ALPHA; // PixelShaderから出力する色(ソースカラー) ソースの値はアルファ値
+	//		blendDesc.RenderTarget[0].BlendOp
+	//			= D3D12_BLEND_OP_ADD; //　PixelShaderから出力するα値(ソースアルファ) 加算
+	//		blendDesc.RenderTarget[0].DestBlend
+	//			= D3D12_BLEND_INV_SRC_ALPHA; // すでに書き込まれている色(デストカラー) デスティネーションの値は1 - アルファ値
+	//	}
+	//	break;
+	//	case kBlendModeAdd: // 加算合成
+	//	{
+	//		blendDesc.RenderTarget[0].SrcBlend
+	//			= D3D12_BLEND_SRC_ALPHA; // PixelShaderから出力する色(ソースカラー) ソースの値はアルファ値
+	//		blendDesc.RenderTarget[0].BlendOp
+	//			= D3D12_BLEND_OP_ADD; //　PixelShaderから出力するα値(ソースアルファ) 加算
+	//		blendDesc.RenderTarget[0].DestBlend
+	//			= D3D12_BLEND_ONE; // すでに書き込まれている色(デストカラー) デスティネーションの値は1 - アルファ値
+	//	}
+	//	break;
+	//	case kBlendModeSubtract: // 減算合成
+	//	{
+	//		blendDesc.RenderTarget[0].SrcBlend
+	//			= D3D12_BLEND_SRC_ALPHA; // PixelShaderから出力する色(ソースカラー) ソースの値はアルファ値
+	//		blendDesc.RenderTarget[0].BlendOp
+	//			= D3D12_BLEND_OP_REV_SUBTRACT; //　PixelShaderから出力するα値(ソースアルファ) 加算
+	//		blendDesc.RenderTarget[0].DestBlend
+	//			= D3D12_BLEND_ONE; // すでに書き込まれている色(デストカラー) デスティネーションの値は1 - アルファ値
+	//	}
+	//	break;
+	//	case kBlendModeMultiply: // 乗算合成
+	//	{
+	//		blendDesc.RenderTarget[0].SrcBlend
+	//			= D3D12_BLEND_ZERO; // PixelShaderから出力する色(ソースカラー) ソースの値はアルファ値
+	//		blendDesc.RenderTarget[0].BlendOp
+	//			= D3D12_BLEND_OP_ADD; //　PixelShaderから出力するα値(ソースアルファ) 加算
+	//		blendDesc.RenderTarget[0].DestBlend
+	//			= D3D12_BLEND_SRC_COLOR; // すでに書き込まれている色(デストカラー) デスティネーションの値は1 - アルファ値
+	//	}
+	//	break;
+	//	case kBlendModeScreen: // スクリーン合成
+	//	{
+	//		blendDesc.RenderTarget[0].SrcBlend
+	//			= D3D12_BLEND_INV_DEST_COLOR; // PixelShaderから出力する色(ソースカラー) ソースの値はアルファ値
+	//		blendDesc.RenderTarget[0].BlendOp
+	//			= D3D12_BLEND_OP_ADD; //　PixelShaderから出力するα値(ソースアルファ) 加算
+	//		blendDesc.RenderTarget[0].DestBlend
+	//			= D3D12_BLEND_ONE; // すでに書き込まれている色(デストカラー) デスティネーションの値は1 - アルファ値
+	//	}
+	//	break;
+	//	}
+
+	//	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE; // アルファ値の計算は無視
+	//	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD; // アルファ値の計算は無視
+	//	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO; // アルファ値の計算は無視
+
+	//}
+
 	// BlendStateの設定
 	D3D12_BLEND_DESC blendDesc{};
 	// すべての色要素を書き込む
 	blendDesc.RenderTarget[0].RenderTargetWriteMask =
 		D3D12_COLOR_WRITE_ENABLE_ALL;
 	blendDesc.RenderTarget[0].BlendEnable = true; // ブレンドする
-	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA; // PixelShaderから出力する色(ソースカラー) ソースの値はアルファ値
-	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD; //　PixelShaderから出力するα値(ソースアルファ) 加算
-	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA; // すでに書き込まれている色(デストカラー) デスティネーションの値は1 - アルファ値
+	// Normal合成
+	{
+		blendDesc.RenderTarget[0].SrcBlend
+			= D3D12_BLEND_SRC_ALPHA; // PixelShaderから出力する色(ソースカラー) ソースの値はアルファ値
+		blendDesc.RenderTarget[0].BlendOp
+			= D3D12_BLEND_OP_ADD; //　PixelShaderから出力するα値(ソースアルファ) 加算
+		blendDesc.RenderTarget[0].DestBlend
+			= D3D12_BLEND_INV_SRC_ALPHA; // すでに書き込まれている色(デストカラー) デスティネーションの値は1 - アルファ値
+	}
+	// 加算合成
+	/*{
+		blendDesc.RenderTarget[0].SrcBlend
+			= D3D12_BLEND_SRC_ALPHA; // PixelShaderから出力する色(ソースカラー) ソースの値はアルファ値
+		blendDesc.RenderTarget[0].BlendOp
+			= D3D12_BLEND_OP_ADD; //　PixelShaderから出力するα値(ソースアルファ) 加算
+		blendDesc.RenderTarget[0].DestBlend
+			= D3D12_BLEND_ONE; // すでに書き込まれている色(デストカラー) デスティネーションの値は1 - アルファ値
+	}*/
+	// 減算合成
+	/*{
+		blendDesc.RenderTarget[0].SrcBlend
+					= D3D12_BLEND_SRC_ALPHA; // PixelShaderから出力する色(ソースカラー) ソースの値はアルファ値
+		blendDesc.RenderTarget[0].BlendOp
+					= D3D12_BLEND_OP_REV_SUBTRACT; //　PixelShaderから出力するα値(ソースアルファ) 加算
+		blendDesc.RenderTarget[0].DestBlend
+					= D3D12_BLEND_ONE; // すでに書き込まれている色(デストカラー) デスティネーションの値は1 - アルファ値
+	}*/
+			// 乗算合成
+			/*{
+				blendDesc.RenderTarget[0].SrcBlend
+					= D3D12_BLEND_ZERO; // PixelShaderから出力する色(ソースカラー) ソースの値はアルファ値
+				blendDesc.RenderTarget[0].BlendOp
+					= D3D12_BLEND_OP_ADD; //　PixelShaderから出力するα値(ソースアルファ) 加算
+				blendDesc.RenderTarget[0].DestBlend
+					= D3D12_BLEND_SRC_COLOR; // すでに書き込まれている色(デストカラー) デスティネーションの値は1 - アルファ値
+			}*/
+			// スクリーン合成
+			/*{
+				blendDesc.RenderTarget[0].SrcBlend
+					= D3D12_BLEND_INT_DEST_COLOR; // PixelShaderから出力する色(ソースカラー) ソースの値はアルファ値
+				blendDesc.RenderTarget[0].BlendOp
+					= D3D12_BLEND_OP_ADD; //　PixelShaderから出力するα値(ソースアルファ) 加算
+				blendDesc.RenderTarget[0].DestBlend
+					= D3D12_BLEND_ONE; // すでに書き込まれている色(デストカラー) デスティネーションの値は1 - アルファ値
+			}*/
+
 	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE; // アルファ値の計算は無視
 	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD; // アルファ値の計算は無視
 	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO; // アルファ値の計算は無視
@@ -1610,7 +1728,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
-			
+
 		}
 		else {
 
@@ -1675,12 +1793,15 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			// これから書き込むバックバッファのインデックスを取得
 			UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
 
-			
+
 #ifdef USE_IMGUI
 
 			ImGui::Begin("Settings");
 
 			ImGui::ColorEdit4("color", reinterpret_cast<float*>(materialDataSprite));
+			// ブレンドモード選択UI
+			const char* blendModeNames[] = { "None", "Normal", "Add", "Subtract", "Multiply", "Screen" };
+			ImGui::Combo("Blend Mode", &currentBlendMode, blendModeNames, IM_ARRAYSIZE(blendModeNames));
 
 			if (ImGui::CollapsingHeader("Object"))
 			{

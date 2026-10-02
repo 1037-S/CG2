@@ -46,7 +46,7 @@ enum BlendMode
 	kBlendModeAdd,
 	//!< 減算ブレンド。Dest * 1 - Src * SrcA
 	kBlendModeSubtract,
-	//!< 乗算ブレンド。Src * 0 + Dest * Src
+	//!< 乗算ブレンド。Src * 0 + Dest * SrcA
 	kBlendModeMultiply,
 	//!< スクリーンブレンド。Src * (1 - Dest) + Dest * 1
 	kBlendModeScreen,
@@ -54,6 +54,7 @@ enum BlendMode
 	kCountOfBlendMode,
 };
 
+inline int currentBlendMode = kBlendModeNormal;
 
 static const int kColumnWidth = 60;
 static const int kRowHeight = 20;
