@@ -1129,7 +1129,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	device->CreateRenderTargetView(swapChainResources[1].Get(), &rtvDesc, rtvHandles[1]);
 
 	// Model読み込み
-	ModelData modelData = LoadObjFile("resources", "axis.obj");
+	ModelData modelData = LoadObjFile("resources", "plane.obj");
 
 
 	// 1枚目のTextureを読んで転送する
@@ -1275,10 +1275,17 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	inputlayoutdesc.NumElements = _countof(inputElementDescs);
 
 	// BlendStateの設定
-	D3D12_BLEND_DESC blenddesc{};
+	D3D12_BLEND_DESC blendDesc{};
 	// すべての色要素を書き込む
-	blenddesc.RenderTarget[0].RenderTargetWriteMask =
+	blendDesc.RenderTarget[0].RenderTargetWriteMask =
 		D3D12_COLOR_WRITE_ENABLE_ALL;
+	blendDesc.RenderTarget[0].BlendEnable = true; // ブレンドする
+	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA; // PixelShaderから出力する色(ソースカラー) ソースの値はアルファ値
+	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD; //　PixelShaderから出力するα値(ソースアルファ) 加算
+	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA; // すでに書き込まれている色(デストカラー) デスティネーションの値は1 - アルファ値
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE; // アルファ値の計算は無視
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD; // アルファ値の計算は無視
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO; // アルファ値の計算は無視
 
 	// RaseerrizerStateの設定
 	D3D12_RASTERIZER_DESC rasterizerdesc{};
@@ -1326,7 +1333,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	vertexShaderBlob->GetBufferSize() }; // vertexShader
 	graphicsPipelineStatedesc.PS = { pixelShaderBlob->GetBufferPointer(),
 	pixelShaderBlob->GetBufferSize() }; // pixelShader
-	graphicsPipelineStatedesc.BlendState = blenddesc; // Blenddesc
+	graphicsPipelineStatedesc.BlendState = blendDesc; // Blenddesc
 	graphicsPipelineStatedesc.RasterizerState = rasterizerdesc; // Rasterizerdesc
 
 	// DepthStencilの設定

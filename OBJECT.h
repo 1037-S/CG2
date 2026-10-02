@@ -36,6 +36,23 @@ struct Transform
 	Vector3 translate;
 };
 
+enum BlendMode
+{
+	//!< ブレンドなし
+	kBlendModeNone,
+	//!< 通常αブレンド。デフォルト。SrcColor(以下Srcと呼称) * SrcAlpha(以下SrcAと呼称) + DestColor(以下Destと呼称) * (1 - srcA)
+	kBlendModeNormal,
+	//!< 加算ブレンド。Src * SrcA + Dest * 1
+	kBlendModeAdd,
+	//!< 減算ブレンド。Dest * 1 - Src * SrcA
+	kBlendModeSubtract,
+	//!< 乗算ブレンド。Src * 0 + Dest * Src
+	kBlendModeMultiply,
+	//!< スクリーンブレンド。Src * (1 - Dest) + Dest * 1
+	kBlendModeScreen,
+	// 利用してはいけない
+	kCountOfBlendMode,
+};
 
 
 static const int kColumnWidth = 60;
