@@ -2,6 +2,8 @@
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 
+
+
 void DebugCamera::Initialize()
 {
 	matRot_ = matrix4_.MakeIdentity4x4();
@@ -133,3 +135,4 @@ void DebugCamera::Update(const uint8_t* keys)
 	viewProjectionMatrix_ = matrix4_.Multiply(viewMatrix_, projectionMatrix_);
 	//viewPortMatrix_ = rpv2_.MakeViewportMatrix(0, 0, float(kWindowWidth), float(kWindowHeight), 0.0f, 1.0f);
 }
+

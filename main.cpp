@@ -1096,6 +1096,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		(void**)&directInput, nullptr);
 	assert(SUCCEEDED(hr));
 
+	//assert(false && "メッセージが表示されているということは警告が発生していますｗ");
+
 	DebugCamera debugCamera;
 	debugCamera.Initialize();
 

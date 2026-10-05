@@ -11,9 +11,12 @@ class DebugCamera
 {
 public:
 
+
 	void Initialize();
 
 	void Update(const uint8_t* keys);
+
+
 	const Matrix4x4& GetViewProjectionMatrix() const { return viewProjectionMatrix_; }
 private:
 	Matrix4 matrix4_;
