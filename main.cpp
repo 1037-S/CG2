@@ -31,6 +31,7 @@
 #include "DebugCamera.h"
 #include "Spheres.h"
 #include "ResourceObject.h"
+#include "Input.h"
 #ifdef USE_IMGUI
 // Imgui
 #include "externals/imgui/imgui.h"
@@ -1089,31 +1090,18 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	const uint32_t descriptorSizeRTV = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	const uint32_t descriptorSizeDSV = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 
+	Input* input = nullptr;
+
+	// 入力の初期化
+	input = new Input();
+	input->Initialize(wc.hInstance, hwnd);
 
 	// DirectInputの初期化
-	IDirectInput8* directInput = nullptr;
-	hr = DirectInput8Create(wc.hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8,
-		(void**)&directInput, nullptr);
-	assert(SUCCEEDED(hr));
 
 	//assert(false && "メッセージが表示されているということは警告が発生していますｗ");
 
 	DebugCamera debugCamera;
-	debugCamera.Initialize();
-
-	// キーボードデバイスの初期化
-	IDirectInputDevice8* keyboard = nullptr;
-	hr = directInput->CreateDevice(GUID_SysKeyboard, &keyboard, NULL);
-	assert(SUCCEEDED(hr));
-
-	// 入力データ形式のセット
-	hr = keyboard->SetDataFormat(&c_dfDIKeyboard); // 標準形式
-	assert(SUCCEEDED(hr));
-
-	// 排他制御レベルのセット
-	hr = keyboard->SetCooperativeLevel(
-		hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
-	assert(SUCCEEDED(hr));
+	debugCamera.Initialize(input);
 
 	// RTVの設定
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
@@ -1131,11 +1119,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	device->CreateRenderTargetView(swapChainResources[1].Get(), &rtvDesc, rtvHandles[1]);
 
 	// Model読み込み
-	ModelData modelData = LoadObjFile("resources/fence", "fence.obj");
+	ModelData modelData = LoadObjFile("resources", "plane.obj");
 
 
 	// 1枚目のTextureを読んで転送する
-	DirectX::ScratchImage mipImages = LoadTexture("resources/fence/fence.png");
+	DirectX::ScratchImage mipImages = LoadTexture("resources/uvChecker.png");
 	const DirectX::TexMetadata metadata = mipImages.GetMetadata();
 	Microsoft::WRL::ComPtr<ID3D12Resource> textureResource = CreateTextureResource(device, metadata);
 	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource = UploadTextureData(textureResource, mipImages, device, commandList);
@@ -1735,18 +1723,15 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		else {
 
 			//ゲームの処理
-			// キーボードの取得開始
-			keyboard->Acquire();
-			// すべてのキーの「入力状態を取得する
-			BYTE key[256] = {};
-			keyboard->GetDeviceState(sizeof(key), key);
+			// 入力の更新
+			input->Update();
 
-			if (key[DIK_0])
+			if (input->IsPushKey(DIK_0))
 			{
 				OutputDebugStringA("Hit 0\n");
 			}
 
-			debugCamera.Update(key);
+			debugCamera.Update();
 
 			//bool preKeys(uint8_t key);
 			//bool NotPreKeys(uint8_t key);
@@ -2005,6 +1990,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	xAudio2.Reset();
 	//ResourceObject depthStancilResource =
 	//	CreareDepthStencilTextureResource(device.Get(), kClientWidth, kClientHeight).Get();
+
+	// Input解放
+	delete input;
 
 	CloseWindow(hwnd);
 

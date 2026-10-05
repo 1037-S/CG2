@@ -5,20 +5,22 @@
 #include "WM4.h"
 #include "RTT.h"
 #include "RPV2.h"
-
+#include "Input.h"
 
 class DebugCamera
 {
 public:
 
 
-	void Initialize();
+	void Initialize(Input* input);
 
-	void Update(const uint8_t* keys);
+	void Update();
 
 
 	const Matrix4x4& GetViewProjectionMatrix() const { return viewProjectionMatrix_; }
 private:
+	Input* input_ = nullptr;
+
 	Matrix4 matrix4_;
 	MakeMatrix MM_;
 	WorldM4 wm4_;
@@ -29,7 +31,8 @@ private:
 	Matrix4x4 matRot_ ;
 	Matrix4x4 matTranslation_ ;
 
-	Vector3 translation_ = {0,0,-50};
+	Vector3 rotation_ = { 0,0,0 };
+	Vector3 translation_ = {0,0,0};
 
 	Matrix4x4 cameraMatrix_;
 	Matrix4x4 worldMatrix_;

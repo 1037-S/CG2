@@ -4,21 +4,27 @@
 
 
 
-void DebugCamera::Initialize()
+void DebugCamera::Initialize(Input* input)
 {
+	input_ = input;
+
 	matRot_ = matrix4_.MakeIdentity4x4();
 	viewMatrix_ = matrix4_.MakeIdentity4x4();
 
 	projectionMatrix_ = matrix4_.MakeIdentity4x4();
 }
 
-void DebugCamera::Update(const uint8_t* keys)
+void DebugCamera::Update()
 {
+	
+
 	Matrix4x4 matRotDelta = matrix4_.MakeIdentity4x4();
 	
-	if (keys[DIK_W])
+
+
+	if (input_->IsPushKey(DIK_W))
 	{
-		const float speed = 1.0f;
+		const float speed = 0.5f;
 
 		Vector3 move = {0,0,speed};
 		//rotation_.x += move.x;
@@ -29,9 +35,9 @@ void DebugCamera::Update(const uint8_t* keys)
 		translation_.y -= move.y;
 		translation_.z -= move.z;
 	}
-	if (keys[DIK_S])
+	if (input_->IsPushKey(DIK_S))
 	{
-		const float speed = 1.0f;
+		const float speed = 0.5f;
 
 		Vector3 move = {0,0,speed};
 		//rotation_.x -= move.x;
@@ -42,9 +48,9 @@ void DebugCamera::Update(const uint8_t* keys)
 		translation_.y += move.y;
 		translation_.z += move.z;
 	}
-	if (keys[DIK_D])
+	if (input_->IsPushKey(DIK_D))
 	{
-		const float speed = 0.5f;
+		const float speed = 0.1f;
 		Vector3 move = { speed,0,0 };
 		
 
@@ -54,9 +60,9 @@ void DebugCamera::Update(const uint8_t* keys)
 
 
 	}
-	if (keys[DIK_A])
+	if (input_->IsPushKey(DIK_A))
 	{
-		const float speed = 0.5f;
+		const float speed = 0.1f;
 		Vector3 move = { speed,0,0 };
 		
 
@@ -66,7 +72,7 @@ void DebugCamera::Update(const uint8_t* keys)
 
 
 	}
-	if (keys[DIK_UP])
+	if (input_->IsPushKey(DIK_UP))
 	{
 		
 		const float speed = 0.01f;
@@ -75,7 +81,7 @@ void DebugCamera::Update(const uint8_t* keys)
 		
 	
 	}
-	if (keys[DIK_DOWN])
+	if (input_->IsPushKey(DIK_DOWN))
 	{
 		const float speed = 0.01f;
 		Vector3 move = { speed,0,0 };
@@ -84,7 +90,7 @@ void DebugCamera::Update(const uint8_t* keys)
 
 		
 	}
-	if (keys[DIK_LEFT])
+	if (input_->IsPushKey(DIK_LEFT))
 	{
 		const float speed = 0.01f;
 		Vector3 move = { 0,speed,0 };
@@ -93,7 +99,7 @@ void DebugCamera::Update(const uint8_t* keys)
 		
 	
 	}
-	if (keys[DIK_RIGHT])
+	if (input_->IsPushKey(DIK_RIGHT))
 	{
 		const float speed = 0.01f;
 		Vector3 move = { 0,speed,0 };
@@ -103,7 +109,7 @@ void DebugCamera::Update(const uint8_t* keys)
 
 		
 	}
-	if (keys[DIK_Z])
+	if (input_->IsPushKey(DIK_Z))
 	{
 		const float speed = 0.01f;
 		Vector3 move = { 0,0,speed };
@@ -112,7 +118,7 @@ void DebugCamera::Update(const uint8_t* keys)
 
 		
 	}
-	if (keys[DIK_C])
+	if (input_->IsPushKey(DIK_C))
 	{
 		const float speed = 0.01f;
 		Vector3 move = { 0,0,speed };
