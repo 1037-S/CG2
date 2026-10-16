@@ -13,12 +13,44 @@ struct Vector2
 {
 	float x;
 	float y;
+
+	Vector2 operator+(Vector2 obj) {
+		Vector2 result;
+
+		result.x = x + obj.x;
+		result.y = y + obj.y;
+		return result;
+	}
+	Vector2 operator-(Vector2 obj) {
+		Vector2 result;
+
+		result.x = x - obj.x;
+		result.y = y - obj.y;
+		return result;
+	}
 };
 
 struct Vector3 {
 	float x;	// 横
 	float y;	// 縦
 	float z;	// 前後
+
+	Vector3 operator+(Vector3 obj) {
+		Vector3 result;
+
+		result.x = x + obj.x;
+		result.y = y + obj.y;
+		result.z = z + obj.z;
+		return result;
+	}
+	Vector3 operator-(Vector3 obj) {
+		Vector3 result;
+
+		result.x = x - obj.x;
+		result.y = y - obj.y;
+		result.z = z - obj.z;
+		return result;
+	}
 };
 
 struct Vector4
@@ -27,6 +59,25 @@ struct Vector4
 	float y;
 	float z;
 	float w;
+
+	Vector4 operator+(Vector4 obj) {
+		Vector4 result;
+
+		result.x = x + obj.x;
+		result.y = y + obj.y;
+		result.z = z + obj.z;
+		result.w = w + obj.w;
+		return result;
+	}
+	Vector4 operator-(Vector4 obj) {
+		Vector4 result;
+
+		result.x = x - obj.x;
+		result.y = y - obj.y;
+		result.z = z - obj.z;
+		result.w = w - obj.w;
+		return result;
+	}
 };
 
 struct Transform
@@ -34,6 +85,11 @@ struct Transform
 	Vector3 scale;
 	Vector3 rotate;
 	Vector3 translate;
+};
+
+struct Particle {
+	Transform transform;
+	Vector3 velocity;
 };
 
 enum BlendMode
