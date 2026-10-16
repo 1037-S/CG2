@@ -1205,7 +1205,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX; // VertexShaderで使う
 	rootParameters[1].DescriptorTable.pDescriptorRanges = descriptorRange;//  tableの中身の配列を指定
 	rootParameters[1].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange); // tableで利用する数
-	rootParameters[1].Descriptor.ShaderRegister = 0;	// レジスタ番号0を使う
+	//rootParameters[1].Descriptor.ShaderRegister = 0;	// レジスタ番号0を使う
 	descriptionRootSignature.pParameters = rootParameters;	// ルートパラメータ配列へのポインタ
 	descriptionRootSignature.NumParameters = _countof(rootParameters); // 配列の長さ
 
@@ -1835,9 +1835,12 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			for (uint32_t index = 0; index < kNumInstance; ++index)
 			{
 				Matrix4x4 worldMatrix = 
-					wm4.MakeAffineMatrix(transforms[index].scale, transforms[index].rotate, transforms[index].translate);
+					wm4.MakeAffineMatrix(
+						transforms[index].scale,
+						transforms[index].rotate,
+						transforms[index].translate);
 				Matrix4x4 worldViewPortMatrix = m4.Multiply(worldMatrix,viewProjectionMatrix);
-				instancingData[index].WVP = worldViewProjectionMatrix;
+				instancingData[index].WVP = worldViewPortMatrix;
 				instancingData[index].World = worldMatrix;
 			}
 
@@ -1956,10 +1959,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 			// instancing用のDataを読むためにStructuredBufferのSRVを設定
 			commandList->SetGraphicsRootDescriptorTable(1, instancingHardleGPU);
-
-			
+	
 			//commandList->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
-
 
 			commandList->DrawInstanced(UINT(modelData.vertices.size()), kNumInstance, 0, 0);
 

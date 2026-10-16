@@ -32,7 +32,7 @@ private:
 	Matrix4x4 matTranslation_ ;
 
 	Vector3 rotation_ = { 0,0,0 };
-	Vector3 translation_ = {0,0,0};
+	Vector3 translation_ = {0,0,-10};
 
 	Matrix4x4 cameraMatrix_;
 	Matrix4x4 worldMatrix_;
