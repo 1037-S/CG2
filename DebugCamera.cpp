@@ -22,7 +22,7 @@ void DebugCamera::Update()
 	
 
 
-	if (input_->IsPushKey(DIK_W))
+	if (input_->PushKey(DIK_W))
 	{
 		const float speed = 0.5f;
 
@@ -35,7 +35,7 @@ void DebugCamera::Update()
 		translation_.y -= move.y;
 		translation_.z -= move.z;
 	}
-	if (input_->IsPushKey(DIK_S))
+	if (input_->PushKey(DIK_S))
 	{
 		const float speed = 0.5f;
 
@@ -48,7 +48,7 @@ void DebugCamera::Update()
 		translation_.y += move.y;
 		translation_.z += move.z;
 	}
-	if (input_->IsPushKey(DIK_D))
+	if (input_->PushKey(DIK_D))
 	{
 		const float speed = 0.1f;
 		Vector3 move = { speed,0,0 };
@@ -60,7 +60,7 @@ void DebugCamera::Update()
 
 
 	}
-	if (input_->IsPushKey(DIK_A))
+	if (input_->PushKey(DIK_A))
 	{
 		const float speed = 0.1f;
 		Vector3 move = { speed,0,0 };
@@ -72,7 +72,7 @@ void DebugCamera::Update()
 
 
 	}
-	if (input_->IsPushKey(DIK_UP))
+	if (input_->PushKey(DIK_UP))
 	{
 		
 		const float speed = 0.01f;
@@ -81,7 +81,7 @@ void DebugCamera::Update()
 		
 	
 	}
-	if (input_->IsPushKey(DIK_DOWN))
+	if (input_->PushKey(DIK_DOWN))
 	{
 		const float speed = 0.01f;
 		Vector3 move = { speed,0,0 };
@@ -90,7 +90,7 @@ void DebugCamera::Update()
 
 		
 	}
-	if (input_->IsPushKey(DIK_LEFT))
+	if (input_->PushKey(DIK_LEFT))
 	{
 		const float speed = 0.01f;
 		Vector3 move = { 0,speed,0 };
@@ -99,7 +99,7 @@ void DebugCamera::Update()
 		
 	
 	}
-	if (input_->IsPushKey(DIK_RIGHT))
+	if (input_->PushKey(DIK_RIGHT))
 	{
 		const float speed = 0.01f;
 		Vector3 move = { 0,speed,0 };
@@ -109,7 +109,7 @@ void DebugCamera::Update()
 
 		
 	}
-	if (input_->IsPushKey(DIK_Z))
+	if (input_->PushKey(DIK_Z))
 	{
 		const float speed = 0.01f;
 		Vector3 move = { 0,0,speed };
@@ -118,7 +118,7 @@ void DebugCamera::Update()
 
 		
 	}
-	if (input_->IsPushKey(DIK_C))
+	if (input_->PushKey(DIK_C))
 	{
 		const float speed = 0.01f;
 		Vector3 move = { 0,0,speed };

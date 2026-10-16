@@ -16,9 +16,9 @@ struct Vector2
 };
 
 struct Vector3 {
-	float x;
-	float y;
-	float z;
+	float x;	// 横
+	float y;	// 縦
+	float z;	// 前後
 };
 
 struct Vector4
