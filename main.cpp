@@ -1687,7 +1687,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	hr = pSourceVoice->Start();
 	assert(SUCCEEDED(hr));
 
-	MSG msg{};
 #ifdef USE_IMGUI
 
 	// ImGuiの初期化
