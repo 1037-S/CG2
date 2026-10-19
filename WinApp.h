@@ -19,7 +19,7 @@ public:
 	void Initialize();
 	void Update();
 	// メッセージの処理
-
+	bool ProcessMessage();
 	// 終了
 	void Finalize();
 

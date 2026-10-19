@@ -1707,14 +1707,17 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 #endif // USE_IMGUI
 
-	// ウィンドウの×ボタンが押されるまでのループ
-	while (msg.message != WM_QUIT) {
-		// windowにメッセージが来てたら最優先で処理させる
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+	
 
+	// ウィンドウの×ボタンが押されるまでのループ
+	while (true) {
+		// windowにメッセージが来てたら最優先で処理させる
+		
+		// Windowsのメッセージの処理
+		if (winApp->ProcessMessage())
+		{
+			// ゲームループを抜ける
+			break;
 		}
 		else {
 
