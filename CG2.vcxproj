@@ -179,7 +179,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(Target)dxil.
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="StringUtility.cpp" />
     <ClCompile Include="V3M.cpp" />
-    <ClCompile Include="Winapp.cpp" />
+    <ClCompile Include="WinApp.cpp" />
     <ClCompile Include="WM4.cpp" />
     <ClCompile Include="WVP.cpp" />
   </ItemGroup>
@@ -247,7 +247,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(Target)dxil.
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="StringUtility.h" />
     <ClInclude Include="V3M.h" />
-    <ClInclude Include="Winapp.h" />
+    <ClInclude Include="WinApp.h" />
     <ClInclude Include="WM4.h" />
     <ClInclude Include="WVP.h" />
   </ItemGroup>

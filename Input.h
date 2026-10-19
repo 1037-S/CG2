@@ -1,4 +1,5 @@
 #pragma once
+#include "Winapp.h"
 #include <Windows.h>
 #include <wrl.h>
 #define DIRECTINPUT_VERSION 0x0800 // DirectInputのバージョン指定
@@ -13,7 +14,7 @@ public:
 
 public:
 	// 初期化関数
-	void Initialize(HINSTANCE hInstance, HWND hwnd);
+	void Initialize(WinApp* winApp);
 	// 更新関数
 	void Update();
 
@@ -32,6 +33,9 @@ public:
 	bool TriggerKey(BYTE keyNumber);
 
 private:
+	// WindowsAPI
+	WinApp* winApp_ = nullptr;
+
 	// すべてのキーの「入力状態」を取得する
 	BYTE key[256] = {};
 	// 前回の全キーの状態
