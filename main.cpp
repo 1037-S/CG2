@@ -33,6 +33,7 @@
 #include "ResourceObject.h"
 #include "WinApp.h"
 #include "Input.h"
+#include "DirectXCommon.h"
 #ifdef USE_IMGUI
 // Imgui
 #include "externals/imgui/imgui.h"
@@ -851,6 +852,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// ポインタ
 	WinApp* winApp = nullptr;
+	DirectXCommon* dxCommon = nullptr;
 
 #ifdef _DEBUG
 	Microsoft::WRL::ComPtr<ID3D12Debug1> debugController = nullptr;
@@ -869,6 +871,10 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// WindowsAPIの初期化
 	winApp = new WinApp();
 	winApp->Initialize();
+
+	// Drectxの初期化
+	dxCommon = new DirectXCommon();
+	dxCommon->Initialize();
 
 	// 変数から型を推論してくれる
 	int enemyHp = 100;
@@ -2013,6 +2019,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// WindowsAPI解放
 	delete winApp;
 	winApp = nullptr;
+
+	// DirectX解放
+	dxCommon = nullptr;
 
 
 	return 0;

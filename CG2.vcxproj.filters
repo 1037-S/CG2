@@ -141,6 +141,9 @@
     <ClCompile Include="DebugCamera.cpp">
       <Filter>エンジンファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Logger.cpp">
+      <Filter>エンジンファイル\Engine\Base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Object3d.VS.hlsl" />
@@ -244,6 +247,9 @@
     </ClInclude>
     <ClInclude Include="DebugCamera.h">
       <Filter>エンジンファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Logger.h">
+      <Filter>エンジンファイル\Engine\Base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

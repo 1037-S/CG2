@@ -136,6 +136,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(Target)dxil.
     <ClCompile Include="Framework.cpp" />
     <ClCompile Include="ImguiManager.cpp" />
     <ClCompile Include="Input.cpp" />
+    <ClCompile Include="Logger.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="MyGame.cpp" />
     <ClCompile Include="Object3D.cpp" />
@@ -225,6 +226,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(Target)dxil.
     <ClInclude Include="Framework.h" />
     <ClInclude Include="ImguiManager.h" />
     <ClInclude Include="Input.h" />
+    <ClInclude Include="Logger.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="MyGame.h" />
     <ClInclude Include="Object3D.h" />
