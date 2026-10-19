@@ -82,31 +82,6 @@ std::string ConvertString(const std::wstring& str) {
 	return result;
 }
 
-//ウィンドウプロシージャ
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg,
-	WPARAM wparam, LPARAM lparam) {
-#ifdef USE_IMGUI
-
-	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam))
-	{
-		return true;
-	}
-
-#endif // USE_IMGUI
-	//メッセージに応じてゲーム固有の処理を行う
-	switch (msg)
-	{
-		//Windowが破棄された
-	case WM_DESTROY:
-		//OSに応じて、アプリの終了を伝える
-		PostQuitMessage(0);
-		return 0;
-	}
-
-	//標準のメッセージ処理を行う
-	return DefWindowProc(hwnd, msg, wparam, lparam);
-
-}
 void Log(const std::string& message) {
 	OutputDebugStringA(message.c_str());
 }
